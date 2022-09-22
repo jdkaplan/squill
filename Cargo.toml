@@ -1,0 +1,17 @@
+[package]
+name = "drift"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.57"
+chrono = { version = "0.4.19", features = ["serde"] }
+clap = { version = "3.2.14", features = ["derive"] }
+lazy_static = "1.4.0"
+regex = "1.6.0"
+sqlx = { version = "0.6.1", features = ["runtime-tokio-native-tls", "postgres", "chrono", "uuid"] }
+tokio = { version = "1.18.2", features = ["full"] }
+tabwriter = "1.2.1"
+thiserror = "1.0.31"
+serde = { version = "1.0.144", features = ["derive"] }
+figment = { version = "0.10.7", features = ["env", "toml"] }

@@ -1,0 +1,64 @@
+linters:
+  # The `--fast` flag used by editor integrations is incompatible with
+  # `disable-all`, so just disable the few bad default linters. As a (nice?)
+  # side-effect, any new default linters will get at least one chance to run on
+  # the whole codebase ;)
+  #
+  # https://github.com/golangci/golangci-lint/issues/1909
+  disable:
+    # `unused` covers more cases _and_ has fewer false-positives.
+    - deadcode
+    - structcheck
+    - varcheck
+  enable:
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - dupl
+    - durationcheck
+    - errcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - godot
+    - goerr113
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - makezero
+    - nilerr
+    - noctx
+    - nolintlint
+    # TODO: Re-enable rowserrcheck once I can say that github.com/blockloop/scan checks the error.
+    - sqlclosecheck
+    - staticcheck
+    - tagliatelle
+    - tenv
+    - testpackage
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - wastedassign
+linters-settings:
+  errcheck:
+    exclude-functions:
+      - (*github.com/spf13/cobra.Command).MarkFlagRequired
+      - github.com/spf13/viper.BindPFlags
+      - github.com/spf13/viper.BindPFlag
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+  unparam:
+    check-exported: true
+severity:
+  default-severity: 'error'
+  rules:
+    - severity: info
+      linters:
+        - dupl
