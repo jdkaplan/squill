@@ -1,4 +1,4 @@
--- ID:   {id}
--- Name: {name}
+-- ID:   {{ id }}
+-- Name: {{ name }}
 --
 -- TODO: Write your migration here!

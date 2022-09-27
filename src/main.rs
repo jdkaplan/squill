@@ -1,3 +1,4 @@
+use askama::Template;
 use clap::{Args, Parser, Subcommand};
 use figment::{
     providers::{Env, Format, Serialized, Toml},
@@ -387,8 +388,24 @@ async fn last_applied(config: Config, conn: &mut PgConnection) -> anyhow::Result
     }
 }
 
-const INIT_UP_SQL: &str = include_str!("./templates/init.up.sql");
-const INIT_DOWN_SQL: &str = include_str!("./templates/init.down.sql");
+// I feel like I have to explain the `escape = "none"` annotations.
+//
+// These migration files either have no parameters (init) or will be immediately modified before
+// being run (new). The arguments to new migrations come from the same person who will be making
+// those changes.
+//
+// So although a SQL escaper would be nice (and arguably more correct), I'm not worried about it
+// for now.
+//
+// TODO: Use a SQL escaper to make me feel better.
+
+#[derive(Template)]
+#[template(path = "init.up.sql", escape = "none")]
+struct InitUp {}
+
+#[derive(Template)]
+#[template(path = "init.down.sql", escape = "none")]
+struct InitDown {}
 
 fn init(config: Config) -> anyhow::Result<()> {
     let id = 0;
@@ -399,15 +416,29 @@ fn init(config: Config) -> anyhow::Result<()> {
         .relative()
         .join(format!("{}-{}", id, name));
 
-    create_migration(dir, INIT_UP_SQL.as_bytes(), INIT_DOWN_SQL.as_bytes())?;
+    let up_content = InitUp {}.render()?;
+    let down_content = InitDown {}.render()?;
+
+    create_migration(dir, up_content.as_bytes(), down_content.as_bytes())?;
 
     println!("Run the `migrate` subcommand to apply this migration.");
 
     Ok(())
 }
 
-const NEW_UP_SQL: &str = include_str!("./templates/new.up.sql");
-const NEW_DOWN_SQL: &str = include_str!("./templates/new.down.sql");
+#[derive(Template)]
+#[template(path = "new.up.sql", escape = "none")]
+struct NewUp<'a> {
+    id: i64,
+    name: &'a str,
+}
+
+#[derive(Template)]
+#[template(path = "new.down.sql", escape = "none")]
+struct NewDown<'a> {
+    id: i64,
+    name: &'a str,
+}
 
 fn new(config: Config, args: New) -> anyhow::Result<()> {
     let id = match args.id {
@@ -423,7 +454,10 @@ fn new(config: Config, args: New) -> anyhow::Result<()> {
         .join(format!("{}-{}", id, name));
 
     // TODO: Allow custom NEW_*_SQL templates.
-    create_migration(dir, NEW_UP_SQL.as_bytes(), NEW_DOWN_SQL.as_bytes())?;
+    let up_content = NewUp { id, name: &name }.render()?;
+    let down_content = NewDown { id, name: &name }.render()?;
+
+    create_migration(dir, up_content.as_bytes(), down_content.as_bytes())?;
 
     println!("Run the `migrate` subcommand to apply this migration.");
 
