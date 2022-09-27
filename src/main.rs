@@ -18,6 +18,7 @@ use tabwriter::TabWriter;
 // TODO: Extract parts of this into a library crate.
 
 #[derive(Parser, Debug)]
+#[clap(version)]
 struct Cli {
     #[clap(subcommand)]
     command: Cmd,
