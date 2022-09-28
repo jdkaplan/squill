@@ -412,6 +412,20 @@ lazy_static! {
     };
 }
 
+fn load_templates(templates_dir: RelativePathBuf) -> anyhow::Result<Tera> {
+    let mut tera = Tera::default();
+
+    let up_path = templates_dir.relative().join("new.up.sql");
+    let up_content = std::fs::read_to_string(up_path)?;
+    tera.add_raw_template("new.up.sql", &up_content)?;
+
+    let down_path = templates_dir.relative().join("new.down.sql");
+    let down_content = std::fs::read_to_string(down_path)?;
+    tera.add_raw_template("new.down.sql", &down_content)?;
+
+    Ok(tera)
+}
+
 fn init(config: Config) -> anyhow::Result<()> {
     let id = 0;
     let name = "init";
@@ -451,7 +465,6 @@ fn new(config: Config, args: New) -> anyhow::Result<()> {
         .relative()
         .join(format!("{}-{}", id, name));
 
-    // TODO: Allow custom NEW_*_SQL templates.
     let ctx = {
         let mut ctx = Context::new();
         ctx.insert("id", &id);
@@ -459,8 +472,19 @@ fn new(config: Config, args: New) -> anyhow::Result<()> {
         ctx
     };
 
-    let up_content = TERA.render("new.up.sql", &ctx)?;
-    let down_content = TERA.render("new.down.sql", &ctx)?;
+    let (up_content, down_content) = match config.templates_dir {
+        Some(dir) => {
+            let tera = load_templates(dir)?;
+            let up = tera.render("new.up.sql", &ctx)?;
+            let down = tera.render("new.down.sql", &ctx)?;
+            (up, down)
+        }
+        None => {
+            let up = TERA.render("new.up.sql", &ctx)?;
+            let down = TERA.render("new.down.sql", &ctx)?;
+            (up, down)
+        }
+    };
 
     create_migration(dir, up_content.as_bytes(), down_content.as_bytes())?;
 
