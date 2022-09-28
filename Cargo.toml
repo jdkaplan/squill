@@ -15,4 +15,4 @@ tabwriter = "1.2.1"
 thiserror = "1.0.31"
 serde = { version = "1.0.144", features = ["derive"] }
 figment = { version = "0.10.7", features = ["env", "toml"] }
-askama = "0.11.1"
+tera = { version = "1.17.1", default-features = false }

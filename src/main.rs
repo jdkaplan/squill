@@ -1,4 +1,3 @@
-use askama::Template;
 use clap::{Args, Parser, Subcommand};
 use figment::{
     providers::{Env, Format, Serialized, Toml},
@@ -15,6 +14,7 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 use tabwriter::TabWriter;
+use tera::{Context, Tera};
 
 // TODO: Extract parts of this into a library crate.
 
@@ -41,6 +41,7 @@ enum Cmd {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Config {
+    // TODO: don't error on missing DB URL for FS-only commands
     database_url: String,
     migrations_dir: RelativePathBuf,
     templates_dir: Option<RelativePathBuf>,
@@ -388,24 +389,28 @@ async fn last_applied(config: Config, conn: &mut PgConnection) -> anyhow::Result
     }
 }
 
-// I feel like I have to explain the `escape = "none"` annotations.
+// These migration files either have no parameters (init) or will be modified before being run
+// (new). The arguments to new migrations come from the same person who will be making those
+// changes.
 //
-// These migration files either have no parameters (init) or will be immediately modified before
-// being run (new). The arguments to new migrations come from the same person who will be making
-// those changes.
+// So although configuring SQL escaping would be nice, I'm not worried about it for now.
 //
-// So although a SQL escaper would be nice (and arguably more correct), I'm not worried about it
-// for now.
-//
-// TODO: Use a SQL escaper to make me feel better.
+// TODO: Call Tera::set_escape_fn to make me feel better.
 
-#[derive(Template)]
-#[template(path = "init.up.sql", escape = "none")]
-struct InitUp {}
-
-#[derive(Template)]
-#[template(path = "init.down.sql", escape = "none")]
-struct InitDown {}
+lazy_static! {
+    static ref TERA: Tera = {
+        let mut tera = Tera::default();
+        tera.add_raw_template("init.up.sql", include_str!("templates/init.up.sql"))
+            .unwrap();
+        tera.add_raw_template("init.down.sql", include_str!("templates/init.down.sql"))
+            .unwrap();
+        tera.add_raw_template("new.up.sql", include_str!("templates/new.up.sql"))
+            .unwrap();
+        tera.add_raw_template("new.down.sql", include_str!("templates/new.down.sql"))
+            .unwrap();
+        tera
+    };
+}
 
 fn init(config: Config) -> anyhow::Result<()> {
     let id = 0;
@@ -416,28 +421,21 @@ fn init(config: Config) -> anyhow::Result<()> {
         .relative()
         .join(format!("{}-{}", id, name));
 
-    let up_content = InitUp {}.render()?;
-    let down_content = InitDown {}.render()?;
+    let ctx = {
+        let mut ctx = Context::new();
+        ctx.insert("id", &id);
+        ctx.insert("name", name);
+        ctx
+    };
+
+    let up_content = TERA.render("init.up.sql", &ctx)?;
+    let down_content = TERA.render("init.down.sql", &ctx)?;
 
     create_migration(dir, up_content.as_bytes(), down_content.as_bytes())?;
 
     println!("Run the `migrate` subcommand to apply this migration.");
 
     Ok(())
-}
-
-#[derive(Template)]
-#[template(path = "new.up.sql", escape = "none")]
-struct NewUp<'a> {
-    id: i64,
-    name: &'a str,
-}
-
-#[derive(Template)]
-#[template(path = "new.down.sql", escape = "none")]
-struct NewDown<'a> {
-    id: i64,
-    name: &'a str,
 }
 
 fn new(config: Config, args: New) -> anyhow::Result<()> {
@@ -454,8 +452,15 @@ fn new(config: Config, args: New) -> anyhow::Result<()> {
         .join(format!("{}-{}", id, name));
 
     // TODO: Allow custom NEW_*_SQL templates.
-    let up_content = NewUp { id, name: &name }.render()?;
-    let down_content = NewDown { id, name: &name }.render()?;
+    let ctx = {
+        let mut ctx = Context::new();
+        ctx.insert("id", &id);
+        ctx.insert("name", &name);
+        ctx
+    };
+
+    let up_content = TERA.render("new.up.sql", &ctx)?;
+    let down_content = TERA.render("new.down.sql", &ctx)?;
 
     create_migration(dir, up_content.as_bytes(), down_content.as_bytes())?;
 
