@@ -298,24 +298,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "drift"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "figment",
- "lazy_static",
- "regex",
- "serde",
- "sqlx",
- "tabwriter",
- "tera",
- "thiserror",
- "tokio",
-]
-
-[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1322,6 +1304,24 @@ dependencies = [
  "once_cell",
  "tokio",
  "tokio-native-tls",
+]
+
+[[package]]
+name = "squill"
+version = "0.3.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "figment",
+ "lazy_static",
+ "regex",
+ "serde",
+ "sqlx",
+ "tabwriter",
+ "tera",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]

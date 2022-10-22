@@ -92,8 +92,8 @@ async fn main() -> anyhow::Result<()> {
             "migrations_dir",
             "migrations".into(),
         ))
-        .merge(Toml::file("drift.toml"))
-        .merge(Env::prefixed("DRIFT_"))
+        .merge(Toml::file("squill.toml"))
+        .merge(Env::prefixed("SQUILL_"))
         .merge(cli.config)
         .extract()?; // TODO: improve config error reporting from here
 
@@ -151,7 +151,7 @@ impl Migration {
             conn.transaction(|conn| {
                 Box::pin(async move {
                     conn.execute(
-                        sqlx::query("select _drift_claim_migration($1, $2)")
+                        sqlx::query("select _squill_claim_migration($1, $2)")
                             .bind(id)
                             .bind(name),
                     )
@@ -176,7 +176,7 @@ impl Migration {
 
             conn.transaction(|conn| {
                 Box::pin(async move {
-                    conn.execute(sqlx::query("select _drift_unclaim_migration($1)").bind(id))
+                    conn.execute(sqlx::query("select _squill_unclaim_migration($1)").bind(id))
                         .await?;
                     conn.execute(&*sql).await
                 })
@@ -221,7 +221,7 @@ impl std::str::FromStr for MigrationId {
 
 lazy_static! {
     static ref RE_MIGRATION: Regex = Regex::new(r"^(?P<id>\d+)-(?P<name>.*)$").unwrap();
-    static ref RE_NO_TX: Regex = Regex::new("(?m)^--drift:no-transaction").unwrap();
+    static ref RE_NO_TX: Regex = Regex::new("(?m)^--squill:no-transaction").unwrap();
 }
 
 fn available_migrations(dir: PathBuf) -> anyhow::Result<Vec<Migration>> {
