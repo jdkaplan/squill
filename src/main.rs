@@ -13,7 +13,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use tabwriter::TabWriter;
+use tabled::{Style, Table, Tabled};
 use tera::{Context, Tera};
 
 // TODO: Extract parts of this into a library crate.
@@ -272,6 +272,22 @@ async fn applied_migrations(conn: &mut PgConnection) -> anyhow::Result<Vec<Migra
     }
 }
 
+#[derive(Debug, Clone, Tabled)]
+struct MigrationStatus {
+    id: i64,
+    name: String,
+    #[tabled(display_with = "display_optional")]
+    run_at: Option<chrono::NaiveDateTime>,
+    comment: &'static str,
+}
+
+fn display_optional(o: &Option<impl std::fmt::Display>) -> String {
+    match o {
+        Some(s) => s.to_string(),
+        None => "".to_string(),
+    }
+}
+
 async fn status(config: Config) -> anyhow::Result<()> {
     let mut conn = PgConnection::connect(&config.database_url).await?;
 
@@ -295,23 +311,38 @@ async fn status(config: Config) -> anyhow::Result<()> {
 
     all_ids.sort();
 
-    let mut table = TabWriter::new(std::io::stdout());
+    let mut rows = Vec::new();
     for id in all_ids {
         match (applied.get(&id), available.get(&id)) {
             (Some(row), Some(_)) => {
-                writeln!(table, "{}\t{}\trun at {}", row.id, row.name, row.run_at)?
+                rows.push(MigrationStatus {
+                    id: row.id,
+                    name: row.name.clone(),
+                    run_at: Some(row.run_at),
+                    comment: "",
+                });
             }
-            (Some(row), None) => writeln!(
-                table,
-                "{}\t{}\trun at{} (missing directory)",
-                row.id, row.name, row.run_at
-            )?,
-            (None, Some(dir)) => writeln!(table, "{}\t{}\ttodo", dir.id.0, dir.name)?,
+            (Some(row), None) => {
+                rows.push(MigrationStatus {
+                    id: row.id,
+                    name: row.name.clone(),
+                    run_at: Some(row.run_at),
+                    comment: "(missing directory)",
+                });
+            }
+            (None, Some(dir)) => {
+                rows.push(MigrationStatus {
+                    id: dir.id.0,
+                    name: dir.name.clone(),
+                    run_at: None,
+                    comment: "todo",
+                });
+            }
             (None, None) => (), // This is impossible, right?
         }
     }
-    table.flush()?;
 
+    print_table(rows);
     Ok(())
 }
 
@@ -519,6 +550,14 @@ fn create_migration(dir: PathBuf, up_sql: &[u8], down_sql: &[u8]) -> anyhow::Res
     Ok(())
 }
 
+#[derive(Debug, Clone, Tabled)]
+struct Rename {
+    #[tabled(display_with = "std::path::Path::to_string_lossy")]
+    from: PathBuf,
+    #[tabled(display_with = "std::path::Path::to_string_lossy")]
+    to: PathBuf,
+}
+
 fn renumber(config: Config, args: Renumber) -> anyhow::Result<()> {
     let migrations = available_migrations(config.migrations_dir.relative())?;
 
@@ -528,12 +567,7 @@ fn renumber(config: Config, args: Renumber) -> anyhow::Result<()> {
 
     let width = migrations.iter().map(|m| m.id.width()).max().unwrap();
 
-    let mut table = TabWriter::new(std::io::stdout());
-    writeln!(table, "From\tTo")?;
-    writeln!(table, "----\t--")?;
-
     let mut renames = Vec::new();
-
     for m in migrations {
         let old = m.path.clone();
 
@@ -541,22 +575,16 @@ fn renumber(config: Config, args: Renumber) -> anyhow::Result<()> {
             .path
             .with_file_name(format!("{:0width$}-{}", m.id.0, m.name));
 
-        writeln!(
-            table,
-            "{}\t{}",
-            old.to_string_lossy(),
-            new.to_string_lossy()
-        )?;
-        renames.push((old, new));
+        renames.push(Rename { from: old, to: new });
     }
 
-    table.flush()?;
+    print_table(&renames);
     println!();
 
     if args.write {
         print!("Renaming files...");
-        for (old, new) in renames {
-            fs::rename(old, new)?;
+        for r in renames {
+            fs::rename(r.from, r.to)?;
         }
         println!(" done!");
     } else {
@@ -565,4 +593,14 @@ fn renumber(config: Config, args: Renumber) -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+fn print_table<I, T>(rows: I)
+where
+    I: IntoIterator<Item = T>,
+    T: Tabled,
+{
+    let mut table = Table::new(rows);
+    table.with(Style::sharp());
+    println!("{}", table);
 }
