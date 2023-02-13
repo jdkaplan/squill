@@ -78,4 +78,3 @@ $$ language plpgsql;
 select _squill_claim_migration(0, 'init');
 
 commit;
-
