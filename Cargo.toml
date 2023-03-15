@@ -15,7 +15,7 @@ clap = { version = "3.2.14", features = ["derive"] }
 figment = { version = "0.10.7", features = ["env", "toml"] }
 lazy_static = "1.4.0"
 regex = "1.7.1"
-serde = { version = "1.0.144", features = ["derive"] }
+serde = { version = "1.0.147", features = ["derive"] }
 sqlx = { version = "0.6.1", features = ["runtime-tokio-native-tls", "postgres", "chrono", "uuid"] }
 tabled = "0.10.0"
 tera = { version = "1.18.0", default-features = false }
