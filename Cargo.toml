@@ -18,7 +18,7 @@ regex = "1.7.1"
 serde = { version = "1.0.144", features = ["derive"] }
 sqlx = { version = "0.6.1", features = ["runtime-tokio-native-tls", "postgres", "chrono", "uuid"] }
 tabled = "0.10.0"
-tera = { version = "1.17.1", default-features = false }
+tera = { version = "1.18.0", default-features = false }
 thiserror = "1.0.31"
 tokio = { version = "1.18.2", features = ["full"] }
 tracing = "0.1.37"
