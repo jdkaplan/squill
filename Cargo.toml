@@ -14,7 +14,7 @@ chrono = { version = "0.4.19", features = ["serde"] }
 clap = { version = "3.2.14", features = ["derive"] }
 figment = { version = "0.10.7", features = ["env", "toml"] }
 lazy_static = "1.4.0"
-regex = "1.6.0"
+regex = "1.7.1"
 serde = { version = "1.0.144", features = ["derive"] }
 sqlx = { version = "0.6.1", features = ["runtime-tokio-native-tls", "postgres", "chrono", "uuid"] }
 tabled = "0.10.0"
