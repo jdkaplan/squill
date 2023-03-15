@@ -10,8 +10,6 @@ use std::io::Write;
 use std::path::PathBuf;
 use tera::{Context, Tera};
 
-// TODO: Extract parts of this into a library crate.
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     // TODO: don't error on missing DB URL for FS-only commands

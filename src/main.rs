@@ -12,8 +12,6 @@ use tera::Tera;
 
 use squill::{Config, MigrationId};
 
-// TODO: Extract parts of this into a library crate.
-
 #[derive(Parser, Debug)]
 #[clap(version)]
 struct Cli {
