@@ -101,8 +101,10 @@ impl MigrationId {
 
 impl MigrationId {
     fn width(&self) -> usize {
-        // TODO(int_log): self.0.checked_log10().unwrap_or(0) + 1
-        format!("{}", self.0).chars().count()
+        // Assuming the i64 is non-negative, the only edge case is zero, which can be treated
+        // like other single-digit numbers that have a log10 of 0.
+        let digits = 1 + self.0.checked_ilog10().unwrap_or(0);
+        digits.try_into().expect("ilog10(i64) is a small number")
     }
 }
 

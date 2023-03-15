@@ -209,6 +209,7 @@ fn renumber(config: &Config, args: Renumber) -> anyhow::Result<()> {
         return Err(anyhow::anyhow!("No migrations to renumber"));
     }
 
+    // TODO: Skip listing unchanged names?
     let renames: Vec<Rename> = renames
         .into_iter()
         .map(|r| Rename {
