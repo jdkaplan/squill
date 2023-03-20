@@ -6,7 +6,11 @@ use figment::{
 };
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::PathBuf,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use tabled::{Style, Table, Tabled};
 use tera::Tera;
 
@@ -143,8 +147,16 @@ struct New {
 }
 
 fn new(config: &Config, args: New) -> anyhow::Result<()> {
-    // TODO: chrono -> time
-    let id = args.id.unwrap_or_else(|| chrono::Utc::now().timestamp());
+    let id = args.id.unwrap_or_else(|| {
+        let epoch_time = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock is not before 1970");
+
+        epoch_time
+            .as_secs()
+            .try_into()
+            .expect("system clock is not in the far future")
+    });
 
     let paths = squill::new(config, id.try_into()?, args.name)?;
 
@@ -240,7 +252,7 @@ struct MigrationStatus {
     id: i64,
     name: String,
     #[tabled(display_with = "display_optional")]
-    run_at: Option<chrono::NaiveDateTime>,
+    run_at: Option<time::PrimitiveDateTime>,
     comment: &'static str,
 }
 

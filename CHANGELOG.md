@@ -14,6 +14,9 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 - Update `tempfile` dependency, which removes a dependency on `remove_dir_all`.
   See [GHSA-mc8h-8q98-g5hr](https://github.com/advisories/GHSA-mc8h-8q98-g5hr)
 
+- Update `time` dependency and use it directly instead of through `chrono`.
+  See [GHSA-wcg3-cvx6-7396](https://github.com/advisories/GHSA-wcg3-cvx6-7396)
+
 ## 0.4.1 - 2023-03-15
 
 ### Dev Changes

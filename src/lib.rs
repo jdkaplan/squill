@@ -173,7 +173,7 @@ pub fn available_migrations(dir: PathBuf) -> anyhow::Result<Vec<Migration>> {
 struct MigrationRow {
     id: i64,
     name: String,
-    run_at: chrono::NaiveDateTime,
+    run_at: time::PrimitiveDateTime,
 }
 
 async fn applied_migrations(conn: &mut PgConnection) -> anyhow::Result<Vec<MigrationRow>> {
@@ -206,7 +206,7 @@ pub struct Status {
 pub struct AppliedMigration {
     pub id: MigrationId,
     pub name: String,
-    pub run_at: chrono::NaiveDateTime,
+    pub run_at: time::PrimitiveDateTime,
 }
 
 pub async fn status(config: &Config) -> anyhow::Result<Status> {
