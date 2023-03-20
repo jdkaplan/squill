@@ -9,7 +9,7 @@ repository = "https://github.com/jdkaplan/squill"
 readme = "README.md"
 
 [dependencies]
-anyhow = "1.0.69"
+anyhow = "1.0.70"
 clap = { version = "4.1.8", features = ["derive"] }
 figment = { version = "0.10.7", features = ["env", "toml"] }
 lazy_static = "1.4.0"
