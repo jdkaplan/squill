@@ -1348,7 +1348,7 @@ dependencies = [
 
 [[package]]
 name = "squill"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "anyhow",
  "clap",

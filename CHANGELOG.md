@@ -9,6 +9,8 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## 0.4.2 - 2023-03-19
+
 ### Fixes
 
 - Update `tempfile` dependency, which removes a dependency on `remove_dir_all`.
@@ -42,8 +44,6 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 Rename from "Drift" to "Squill".
 Release on [crates.io](https://crates.io) as [squill](https://crates.io/crates/squill).
-
-**Full Changelog**: https://github.com/jdkaplan/squill/commits/v0.3.0
 
 ## 0.2.0 (Never released)
 
