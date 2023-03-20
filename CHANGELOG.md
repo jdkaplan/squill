@@ -9,12 +9,17 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+### Fixes
+
+- Update `tempfile` dependency, which removes a dependency on `remove_dir_all`.
+  See [GHSA-mc8h-8q98-g5hr](https://github.com/advisories/GHSA-mc8h-8q98-g5hr)
+
 ## 0.4.1 - 2023-03-15
 
 ### Dev Changes
 
 - Configure Dependabot.
-- Update to clap v4.
+- Update to `clap` v4.
 
 ## 0.4.0 - 2023-03-14
 
