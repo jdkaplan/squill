@@ -11,7 +11,7 @@ use std::{
     path::PathBuf,
     time::{SystemTime, UNIX_EPOCH},
 };
-use tabled::{Style, Table, Tabled};
+use tabled::{settings::Style, Table, Tabled};
 use tera::Tera;
 
 use squill::{Config, MigrationId};
