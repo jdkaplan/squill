@@ -1,0 +1,9 @@
+-- The directive comment _must_ be in the first column of the file.
+-- It also _must not_ contain any spaces.
+--
+-- ❇ Database design ❇
+	   --squill:no-transaction
+-- squill:no-transaction
+--squill :no-transaction
+--squill: no-transaction
+-- ❇ is my passion ❇

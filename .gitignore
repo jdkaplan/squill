@@ -1,1 +1,6 @@
+# Cargo output
 /target
+
+# For testing with `cargo run`
+/migrations
+/squill.toml

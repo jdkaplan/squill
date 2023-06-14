@@ -1,0 +1,6 @@
+-- This block comment might describe the purpose of the migration, or even
+-- explain why the directive below is present.
+--
+--squill:no-transaction
+--
+-- There may also be some trailing text.

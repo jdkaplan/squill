@@ -1,44 +1,67 @@
-use clap::{Args, Parser, Subcommand};
-use figment::{
-    providers::{Env, Format, Serialized, Toml},
-    value::{magic::RelativePathBuf, Dict, Map, Value},
-    Figment, Metadata, Profile, Provider,
-};
-use lazy_static::lazy_static;
-use serde::{Deserialize, Serialize};
-use std::{
-    fs,
-    path::PathBuf,
-    time::{SystemTime, UNIX_EPOCH},
-};
-use tabled::{settings::Style, Table, Tabled};
-use tera::Tera;
+use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
 
-use squill::{Config, MigrationId};
+use anyhow::anyhow;
+use clap::{Args, Parser, Subcommand};
+use figment::providers::{Env, Format, Serialized, Toml};
+use figment::value::{magic::RelativePathBuf, Dict, Map, Value};
+use figment::{Figment, Metadata, Profile, Provider};
+use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgConnectOptions;
+use tabled::{settings::Style, Table, Tabled};
+use tokio::task::spawn_blocking;
+
+use squill::{create_init_migration, create_new_migration};
+use squill::{Config, MigrationIndex, Status};
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
+    enable_tracing(cli.config.verbosity);
+
+    let fig = Figment::new()
+        .merge(Serialized::<RelativePathBuf>::default(
+            "migrations_dir",
+            "migrations".into(),
+        ))
+        .merge(Toml::file("squill.toml"))
+        .merge(Env::prefixed("SQUILL_"))
+        .merge(cli.config);
+
+    let config = extract(fig)?;
+
+    cli.command.execute(config).await
+}
+
+fn enable_tracing(verbosity: u8) {
+    use tracing_subscriber::filter::LevelFilter;
+
+    let max_level = match verbosity {
+        0 => LevelFilter::OFF,
+        1 => LevelFilter::ERROR,
+        2 => LevelFilter::INFO,
+        3.. => LevelFilter::DEBUG,
+    };
+
+    tracing_subscriber::fmt()
+        .pretty()
+        .with_max_level(max_level)
+        .init();
+}
 
 #[derive(Parser, Debug)]
 #[clap(version)]
-struct Cli {
+pub struct Cli {
     #[clap(subcommand)]
-    command: Cmd,
+    pub command: Cmd,
 
     #[clap(flatten)]
-    config: CliConfig,
-}
-
-#[derive(Subcommand, Debug)]
-enum Cmd {
-    Init,
-    New(New),
-    Renumber(Renumber),
-    Status,
-    Migrate,
-    Undo,
-    Redo,
+    pub config: CliConfig,
 }
 
 #[derive(Debug, Deserialize, Serialize, Args)]
-struct CliConfig {
+pub struct CliConfig {
     #[clap(long, value_parser, global = true)]
     database_url: Option<String>,
 
@@ -76,56 +99,80 @@ impl Provider for CliConfig {
     }
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let cli = Cli::parse();
+fn extract(fig: Figment) -> anyhow::Result<Config> {
+    let migrations_dir: RelativePathBuf = fig.extract_inner("migrations_dir")?;
 
-    enable_tracing(cli.config.verbosity);
+    // If the templates dir is unset, that's fine because there are default embedded
+    // templates. This can still fail if the directory that _was_ set is invalid.
+    let templates_dir: Option<RelativePathBuf> = extract_inner_or_default(&fig, "templates_dir")?;
 
-    let config: Config = Figment::new()
-        .merge(Serialized::<RelativePathBuf>::default(
-            "migrations_dir",
-            "migrations".into(),
-        ))
-        .merge(Toml::file("squill.toml"))
-        .merge(Env::prefixed("SQUILL_"))
-        .merge(cli.config)
-        .extract()?; // TODO: improve config error reporting from here
+    // Although it might not seem like it, this is easier than deriving Deserialize for a newtype
+    // around PgConnectOptions.
+    let database_url: Option<String> = fig.extract_inner("database_url")?;
 
-    match cli.command {
-        Cmd::Init => init(&config),
-        Cmd::New(args) => new(&config, args),
-        Cmd::Renumber(args) => renumber(&config, args),
-        Cmd::Status => status(&config).await,
-        Cmd::Migrate => migrate(&config).await,
-        Cmd::Undo => undo(&config).await,
-        Cmd::Redo => redo(&config).await,
+    let database_connect_options = if let Some(url) = database_url {
+        Some(url.parse::<PgConnectOptions>()?)
+    } else {
+        None
+    };
+
+    Ok(Config {
+        database_connect_options,
+        migrations_dir: migrations_dir.relative(),
+        templates_dir: templates_dir.map(|dir| dir.relative()),
+    })
+}
+
+fn extract_inner_or_default<'a, T>(fig: &Figment, key: &str) -> Result<T, figment::Error>
+where
+    T: Default + Deserialize<'a>,
+{
+    match fig.extract_inner::<T>(key) {
+        Ok(val) => Ok(val),
+        Err(err) => {
+            for e in err.clone() {
+                if e.missing() {
+                    return Ok(T::default());
+                }
+            }
+            Err(err)
+        }
     }
 }
 
-fn enable_tracing(verbosity: u8) {
-    use tracing_subscriber::filter::LevelFilter;
+#[derive(Subcommand, Debug)]
+pub enum Cmd {
+    Init,
+    New(New),
+    Renumber(Renumber),
+    Status,
+    Migrate,
+    Undo,
+    Redo,
+}
 
-    let max_level = match verbosity {
-        0 => LevelFilter::OFF,
-        1 => LevelFilter::ERROR,
-        2 => LevelFilter::INFO,
-        3.. => LevelFilter::DEBUG,
-    };
+impl Cmd {
+    pub async fn execute(self, config: Config) -> anyhow::Result<()> {
+        match self {
+            Cmd::Init => spawn_blocking(move || init(&config)).await?,
+            Cmd::New(args) => spawn_blocking(move || new(&config, args)).await?,
+            Cmd::Renumber(args) => spawn_blocking(move || renumber(&config, args)).await?,
 
-    tracing_subscriber::fmt()
-        .pretty()
-        .with_max_level(max_level)
-        .init();
+            Cmd::Status => status(&config).await,
+            Cmd::Migrate => migrate(&config).await,
+            Cmd::Undo => undo(&config).await,
+            Cmd::Redo => redo(&config).await,
+        }
+    }
 }
 
 fn init(config: &Config) -> anyhow::Result<()> {
-    let paths = squill::init(config)?;
+    let files = create_init_migration(config)?;
 
     println!("New migration files:");
     println!();
-    println!("  {}", paths.up.to_string_lossy());
-    println!("  {}", paths.down.to_string_lossy());
+    println!("  {}", files.up_path.to_string_lossy());
+    println!("  {}", files.down_path.to_string_lossy());
     println!();
     println!("This prepares the database so Squill can track which migrations have been applied.");
     println!("You can edit these files if you want to.");
@@ -138,12 +185,12 @@ fn init(config: &Config) -> anyhow::Result<()> {
 }
 
 #[derive(Args, Debug)]
-struct New {
+pub struct New {
     #[clap(long, value_parser)]
-    id: Option<i64>,
+    pub id: Option<i64>,
 
     #[clap(long, value_parser)]
-    name: String,
+    pub name: String,
 }
 
 fn new(config: &Config, args: New) -> anyhow::Result<()> {
@@ -158,12 +205,12 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
             .expect("system clock is not in the far future")
     });
 
-    let paths = squill::new(config, id.try_into()?, args.name)?;
+    let files = create_new_migration(config, id.try_into()?, args.name)?;
 
     println!("New migration files:");
     println!();
-    println!("  {}", paths.up.to_string_lossy());
-    println!("  {}", paths.down.to_string_lossy());
+    println!("  {}", files.up_path.to_string_lossy());
+    println!("  {}", files.down_path.to_string_lossy());
     println!();
     println!("Run `squill migrate` to apply the up migration.");
 
@@ -171,39 +218,9 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
 }
 
 #[derive(Args, Debug)]
-struct Renumber {
+pub struct Renumber {
     #[clap(long, value_parser, default_value = "false")]
-    write: bool,
-}
-
-fn display_optional(o: &Option<impl std::fmt::Display>) -> String {
-    match o {
-        Some(s) => s.to_string(),
-        None => "".to_string(),
-    }
-}
-
-// These migration files either have no parameters (init) or will be modified before being run
-// (new). The arguments to new migrations come from the same person who will be making those
-// changes.
-//
-// So although configuring SQL escaping would be nice, I'm not worried about it for now.
-//
-// TODO: Call Tera::set_escape_fn to make me feel better.
-
-lazy_static! {
-    static ref TERA: Tera = {
-        let mut tera = Tera::default();
-        tera.add_raw_template("init.up.sql", include_str!("templates/init.up.sql"))
-            .unwrap();
-        tera.add_raw_template("init.down.sql", include_str!("templates/init.down.sql"))
-            .unwrap();
-        tera.add_raw_template("new.up.sql", include_str!("templates/new.up.sql"))
-            .unwrap();
-        tera.add_raw_template("new.down.sql", include_str!("templates/new.down.sql"))
-            .unwrap();
-        tera
-    };
+    pub write: bool,
 }
 
 #[derive(Debug, Clone, Tabled)]
@@ -215,13 +232,14 @@ struct Rename {
 }
 
 fn renumber(config: &Config, args: Renumber) -> anyhow::Result<()> {
-    let renames = squill::renumber(config)?;
+    let migrations = MigrationIndex::new(&config.migrations_dir)?;
+
+    let renames = migrations.align_ids();
 
     if renames.is_empty() {
         return Err(anyhow::anyhow!("No migrations to renumber"));
     }
 
-    // TODO: Skip listing unchanged names?
     let renames: Vec<Rename> = renames
         .into_iter()
         .map(|r| Rename {
@@ -236,7 +254,7 @@ fn renumber(config: &Config, args: Renumber) -> anyhow::Result<()> {
     if args.write {
         print!("Renaming files...");
         for r in renames {
-            fs::rename(r.from, r.to)?;
+            std::fs::rename(r.from, r.to)?;
         }
         println!(" done!");
     } else {
@@ -253,60 +271,33 @@ struct MigrationStatus {
     name: String,
     #[tabled(display_with = "display_optional")]
     run_at: Option<time::PrimitiveDateTime>,
-    comment: &'static str,
+    #[tabled(display_with = "display_optional")]
+    directory: Option<String>,
 }
 
 async fn status(config: &Config) -> anyhow::Result<()> {
-    let status = squill::status(config).await?;
+    let status = Status::new(config).await?;
 
-    let all_ids = {
-        let mut ids: Vec<MigrationId> = Vec::new();
-        ids.extend(status.applied.keys());
-        ids.extend(status.available.keys());
-        ids.sort();
-        ids
-    };
+    let zipped = status.full_status();
 
-    let mut rows = Vec::new();
-    for id in all_ids {
-        match (status.applied.get(&id), status.available.get(&id)) {
-            (Some(row), Some(_)) => {
-                rows.push(MigrationStatus {
-                    id: row.id.into(),
-                    name: row.name.clone(),
-                    run_at: Some(row.run_at),
-                    comment: "",
-                });
-            }
-            (Some(row), None) => {
-                rows.push(MigrationStatus {
-                    id: row.id.into(),
-                    name: row.name.clone(),
-                    run_at: Some(row.run_at),
-                    comment: "(missing directory)",
-                });
-            }
-            (None, Some(dir)) => {
-                rows.push(MigrationStatus {
-                    id: dir.id.into(),
-                    name: dir.name.clone(),
-                    run_at: None,
-                    comment: "todo",
-                });
-            }
-            (None, None) => (), // This is impossible, right?
-        }
-    }
+    let rows = zipped.values().cloned().map(|v| MigrationStatus {
+        id: v.id.into(),
+        name: v.name,
+        run_at: v.run_at,
+        directory: v.directory,
+    });
 
     print_table(rows);
     Ok(())
 }
 
+// TODO: Optionally up through certain ID
 async fn migrate(config: &Config) -> anyhow::Result<()> {
-    let unapplied = squill::unapplied(config).await?;
+    let status = Status::new(config).await?;
+
     let mut conn = config.connect().await?;
 
-    for migration in unapplied {
+    for migration in status.pending() {
         println!("Running up migration: {}", migration);
         migration.up(&mut conn).await?;
     }
@@ -314,10 +305,21 @@ async fn migrate(config: &Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn undo(config: &Config) -> anyhow::Result<()> {
-    let mut conn = config.connect().await?;
+// TODO: Optionally _down_ to (but not below) a certain ID?
 
-    let migration = squill::last_applied(config, &mut conn).await?;
+// TODO: Optionally undo a specific ID
+async fn undo(config: &Config) -> anyhow::Result<()> {
+    let status = Status::new(config).await?;
+
+    let Some(migration) = status.applied.last() else {
+        return Err(anyhow!("No migration to undo"));
+    };
+
+    let Some(migration) = status.available.get(migration.id) else {
+        return Err(anyhow!("Could not find files for migration ID {} ({})", migration.id, migration.name))
+    };
+
+    let mut conn = config.connect().await?;
 
     println!("Running down migration: {}", migration);
     migration.down(&mut conn).await?;
@@ -325,18 +327,34 @@ async fn undo(config: &Config) -> anyhow::Result<()> {
     Ok(())
 }
 
+// TODO: Optionally redo a specific ID
 pub async fn redo(config: &Config) -> anyhow::Result<()> {
+    let status = Status::new(config).await?;
+
+    let Some(migration) = status.applied.last() else {
+        return Err(anyhow!("No migration to redo"));
+    };
+
+    let Some(migration) = status.available.get(migration.id) else {
+        return Err(anyhow!("Could not find files for migration ID {} ({})", migration.id, migration.name))
+    };
+
     let mut conn = config.connect().await?;
 
-    let migration = squill::last_applied(config, &mut conn).await?;
-
-    println!("Undoing migration: {}", migration);
+    println!("Running down migration: {}", migration);
     migration.down(&mut conn).await?;
 
-    println!("Redoing migration: {}", migration);
+    println!("Running up migration: {}", migration);
     migration.up(&mut conn).await?;
 
     Ok(())
+}
+
+fn display_optional(o: &Option<impl std::fmt::Display>) -> String {
+    match o {
+        Some(s) => s.to_string(),
+        None => "".to_string(),
+    }
 }
 
 fn print_table<I, T>(rows: I)
