@@ -9,6 +9,26 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+### Features
+
+- Now with modules and types!
+- Derive useful standard library traits on types
+- Replace `anyhow::Result` with operation-specific error enums
+
+### Fixes
+
+- `init`, `new`, `renumber`: Allow filesystem-only commands without DB config
+- `status`: Avoid printing duplicate rows for applied migrations
+- `status`: Print local migration directory name if present
+- `status`: Remove redundant "comment" field
+- `init`, `new`: Error if migration ID already exists
+
+### Development
+
+- Now with tests!
+- Ignore CLI files when running the command from this repo
+- Add `docker-compose.yml` for local integration testing
+
 ## 0.4.2 - 2023-03-19
 
 ### Fixes
