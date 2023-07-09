@@ -1,0 +1,22 @@
+[advisories]
+vulnerability = "deny"
+unmaintained = "warn"
+yanked = "warn"
+notice = "warn"
+
+[bans]
+multiple-versions = "warn"
+highlight = "all"
+wildcards = "warn"
+
+[licenses]
+# Require extra-high confidence. Default was 0.8
+confidence-threshold = 0.93
+
+default = "deny"
+allow = [
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "MIT",
+    "Unicode-DFS-2016",
+]
