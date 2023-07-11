@@ -5,19 +5,19 @@ use regex::Regex;
 
 pub mod config;
 pub mod db;
-pub mod fs;
+pub mod index;
 pub mod migrate;
 pub mod status;
 pub mod template;
 
 pub use crate::config::{Config, ConnectError};
 pub use crate::db::{MigrationLog, MigrationRecord, QueryError};
-pub use crate::fs::{CreateMigrationError, IndexError, MigrationIndex};
+pub use crate::index::{CreateMigrationError, IndexError, MigrationIndex};
 pub use crate::migrate::{MigrateError, MigrationDirectory, MigrationId, ParseMigrationIdError};
 pub use crate::status::{Status, StatusError};
 pub use crate::template::{TemplateContext, TemplateError, TemplateId, Templates};
 
-use crate::fs::{IoError, MigrationParams};
+use crate::index::{IoError, MigrationParams};
 
 #[cfg(test)]
 mod testing;
