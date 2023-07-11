@@ -138,7 +138,18 @@ impl MigrationIndex {
 }
 
 fn available_migrations(dir: &Path) -> Result<Vec<MigrationDirectory>, IndexError> {
-    let entries = fs::read_dir(dir).map_err(IndexError::ReadDir)?;
+    let entries = match fs::read_dir(dir) {
+        Ok(entries) => entries,
+
+        // Avoid a useless error if the directory doesn't exist.
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            return Ok(Vec::new());
+        }
+
+        Err(err) => {
+            return Err(IndexError::ReadDir(err));
+        }
+    };
 
     lazy_static! {
         static ref RE_MIGRATION: Regex =
@@ -243,11 +254,10 @@ mod tests {
 
         std::fs::remove_dir(&config.migrations_dir).unwrap();
 
-        match MigrationIndex::new(&config.migrations_dir) {
-            Err(IndexError::ReadDir(_)) => (),
-            Ok(index) => panic!("Index built from invalid state: {index:?}"),
-            Err(err) => panic!("{err:?}"),
-        }
+        let index = MigrationIndex::new(&config.migrations_dir).unwrap();
+
+        assert_eq!(config.migrations_dir, index.dir);
+        assert_eq!(0, index.index.len());
     }
 
     #[tokio::test]

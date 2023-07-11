@@ -186,6 +186,30 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn nonexistent_migration_directory() {
+        let env = TestEnv::new().await.unwrap();
+        let mut config = env.config();
+
+        // Set up our expected paths before changing the config.
+        let expected_up_path = config.migrations_dir.join("nonexistent/0-init/up.sql");
+        let expected_down_path = config.migrations_dir.join("nonexistent/0-init/down.sql");
+
+        // Now configure the migrations directory to be a path that doesn't (yet) exist.
+        config.migrations_dir = config.migrations_dir.join("nonexistent");
+
+        create_init_migration(&config).unwrap();
+
+        let up = std::fs::read_to_string(expected_up_path).unwrap();
+        assert!(up.contains("create table schema_migrations"), "{up:?}");
+
+        let down = std::fs::read_to_string(expected_down_path).unwrap();
+        assert!(
+            down.contains("drop table if exists schema_migrations"),
+            "{down:?}"
+        );
+    }
+
+    #[tokio::test]
     async fn initial_migration() {
         let env = TestEnv::new().await.unwrap();
         let config = env.config();
