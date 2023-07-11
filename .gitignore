@@ -4,3 +4,6 @@
 # For testing with `cargo run`
 /migrations
 /squill.toml
+
+# Combined licenses of all dependencies. Included in packaged artifacts.
+THIRD_PARTY_LICENSES
