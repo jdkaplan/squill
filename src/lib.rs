@@ -10,14 +10,11 @@ pub mod migrate;
 pub mod status;
 pub mod template;
 
-pub use crate::config::{Config, ConnectError};
-pub use crate::db::{MigrationLog, MigrationRecord, QueryError};
-pub use crate::index::{CreateMigrationError, IndexError, MigrationIndex};
-pub use crate::migrate::{MigrateError, MigrationDirectory, MigrationId, ParseMigrationIdError};
-pub use crate::status::{Status, StatusError};
-pub use crate::template::{TemplateContext, TemplateError, TemplateId, Templates};
-
-use crate::index::{IoError, MigrationParams};
+use crate::config::{Config, ConnectError};
+use crate::index::{CreateMigrationError, IndexError, IoError, MigrationIndex, MigrationParams};
+use crate::migrate::{MigrateError, MigrationDirectory, MigrationId};
+use crate::status::{Status, StatusError};
+use crate::template::{TemplateContext, TemplateError, TemplateId, Templates};
 
 #[cfg(test)]
 mod testing;
