@@ -122,7 +122,7 @@ impl MigrationDirectory {
 
             conn.transaction(|conn| {
                 Box::pin(async move {
-                    claim(&mut *conn, id, &name).await?;
+                    claim(&mut **conn, id, &name).await?;
                     conn.execute(&*sql).await
                 })
             })
@@ -144,7 +144,7 @@ impl MigrationDirectory {
 
             conn.transaction(|conn| {
                 Box::pin(async move {
-                    unclaim(&mut *conn, id).await?;
+                    unclaim(&mut **conn, id).await?;
                     conn.execute(&*sql).await
                 })
             })
