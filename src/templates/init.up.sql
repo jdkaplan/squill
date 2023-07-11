@@ -2,30 +2,37 @@
 Set up the Squill framework requirements. Naturally, this first migration is
 going to break a few rules ;)
 
-First, this includes a squill:no-transaction directive, which tells Squill to
-skip two steps it would normally take:
+Normally, Squill would automatically add a few steps while running a migration.
+Most importantly it would...
 
-1. Opening a transaction around the migration file. In Postgres, DDL can be
-   done in a transaction. This can make some migrations safer, so Squill
-   assumes transactions as the default.
-2. Calling _squill_claim_migration(id, name) before running the file. Since
-   this claim would fail on a duplicate ID, this ensures we never run a
-   migration twice (since it's normally part of a transaction).
+1. Open a transaction around the migration file. In Postgres, DDL can be done
+   in a transaction. This can make some migrations safer, so Squill assumes
+   transactions as the default.
+
+2. Call `_squill_claim_migration(id, name)` within that transaction before
+   running the file. Since this claim would fail on a duplicate ID, this
+   ensures that we never run a migration twice.
 
 It doesn't make sense to call _squill_claim_migration yet, because this is the
 migration that defines it!
+
+So this file includes a squill:no-transaction directive (below), which tells
+Squill to skip those steps. You can use this in your own migrations if you want
+to control over the transaction and claim behavior. But remember: if you
+disable the automatic transaction, your migration is responsible for recording
+itself in the migration log!
 
 You can modify the _squill_claim_migration function if you want to. The only
 expectation Squill has of it (besides the signature) is that it writes the
 migration ID to the table and fails if that ID is already recorded.
 
-You can also modify _squill_require_migration; Squill doesn't use it. It's
-useful to call within a migration when it would only make sense to run after
-some earlier one has completed.
+You can also modify (or remove) _squill_require_migration; Squill doesn't use
+it. It's useful to call within a migration that would only make sense to run
+after some earlier one has completed.
 
 You can also modify the schema_migrations table, but (at least for now) Squill
-assumes that the migration records table has exactly that name and has the
-bigint primary key id column.
+assumes that the migration log has exactly that name and at least the columns
+defined here.
 */
 --squill:no-transaction
 begin;
@@ -52,10 +59,10 @@ $$ language sql;
 -- When iterating on a migration in development, it's useful to have a down
 -- migration to reset back to the previous schema. Squill will call this at the
 -- start of every "down" migration transaction so the "up" migration can run
--- again.
-create function _squill_unclaim_migration(mid bigint) returns void as $$
-    delete from schema_migrations where id = mid;
-$$ language sql;
+-- again. For migrations that cannot be run within transactions, it is the
+-- migration's responsibility to call this.
+create function _squill_unclaim_migration(mid bigint) returns void as $$ delete
+from schema_migrations where id = mid; $$ language sql;
 
 -- _squill_require_migration asserts that the migration ID has already been
 -- claimed in the schema_migrations table.
