@@ -2,7 +2,7 @@ use sqlx::{postgres::PgConnectOptions, ConnectOptions, Executor};
 use tempfile::TempDir;
 use uuid::Uuid;
 
-use crate::fs::MigrationParams;
+use crate::index::MigrationParams;
 use crate::{create_init_migration, Config};
 
 pub const NO_OP_NO_TX: &str = include_str!("testing/no_op_no_tx.sql");

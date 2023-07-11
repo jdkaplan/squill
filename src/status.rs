@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::config::{Config, ConnectError};
 use crate::db::{MigrationLog, MigrationRecord, QueryError};
-use crate::fs::{IndexError, IoError, MigrationIndex};
+use crate::index::{IndexError, IoError, MigrationIndex};
 use crate::migrate::{MigrationDirectory, MigrationId};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
