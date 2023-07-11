@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tera::{Context, Tera};
 
 use crate::MigrationId;
@@ -97,12 +97,16 @@ impl Templates {
 }
 
 fn read_file(path: impl AsRef<Path>) -> Result<Option<String>, TemplateError> {
+    let path = path.as_ref();
     match std::fs::read_to_string(path) {
         Ok(content) => Ok(Some(content)),
 
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),
 
-        Err(err) => Err(TemplateError::Read(err)),
+        Err(err) => Err(TemplateError::Read {
+            path: path.to_path_buf(),
+            err,
+        }),
     }
 }
 
@@ -114,8 +118,8 @@ impl Default for Templates {
 
 #[derive(thiserror::Error, Debug)]
 pub enum TemplateError {
-    #[error("failed to read template file: {0}")]
-    Read(std::io::Error),
+    #[error("failed to read template file: {path}: {err}")]
+    Read { path: PathBuf, err: std::io::Error },
 
     #[error("failed to parse template file: {0}")]
     Parse(tera::Error),

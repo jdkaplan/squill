@@ -54,8 +54,8 @@ impl MigrationIndex {
 
 #[derive(thiserror::Error, Debug)]
 pub enum IndexError {
-    #[error("failed to read directory: {0}")]
-    ReadDir(std::io::Error),
+    #[error("failed to read directory: {path}: {err}")]
+    ReadDir { path: PathBuf, err: std::io::Error },
 
     #[error("multiple directories found for some migration IDs: (count={})", .0.len())]
     MultipleMigrationDirectories(BTreeMap<MigrationId, Vec<MigrationDirectory>>),
@@ -147,7 +147,10 @@ fn available_migrations(dir: &Path) -> Result<Vec<MigrationDirectory>, IndexErro
         }
 
         Err(err) => {
-            return Err(IndexError::ReadDir(err));
+            return Err(IndexError::ReadDir {
+                path: dir.to_path_buf(),
+                err,
+            });
         }
     };
 
@@ -185,14 +188,14 @@ fn available_migrations(dir: &Path) -> Result<Vec<MigrationDirectory>, IndexErro
 
 #[derive(thiserror::Error, Debug)]
 pub enum IoError {
-    #[error("failed to create directory: {0}")]
-    CreateDir(std::io::Error),
+    #[error("failed to create directory: {0}: {1}")]
+    CreateDir(PathBuf, std::io::Error),
 
-    #[error("failed to create file: {0}")]
-    CreateFile(std::io::Error),
+    #[error("failed to create file: {0}: {1}")]
+    CreateFile(PathBuf, std::io::Error),
 
-    #[error("failed to write file: {0}")]
-    WriteFile(std::io::Error),
+    #[error("failed to write file: {0}: {1}")]
+    WriteFile(PathBuf, std::io::Error),
 }
 
 fn create_migration_files(
@@ -222,14 +225,14 @@ fn create_migration_files(
 }
 
 fn mkdir(path: &Path) -> Result<(), IoError> {
-    std::fs::create_dir_all(path).map_err(IoError::CreateDir)
+    std::fs::create_dir_all(path).map_err(|err| IoError::CreateDir(path.to_path_buf(), err))
 }
 
 fn create_file(path: &Path, content: &str) -> Result<(), IoError> {
     std::fs::File::create(path)
-        .map_err(IoError::CreateFile)?
+        .map_err(|err| IoError::CreateFile(path.to_path_buf(), err))?
         .write_all(content.as_bytes())
-        .map_err(IoError::WriteFile)
+        .map_err(|err| IoError::WriteFile(path.to_path_buf(), err))
 }
 
 #[cfg(test)]
