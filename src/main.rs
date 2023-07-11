@@ -11,8 +11,8 @@ use sqlx::postgres::PgConnectOptions;
 use tabled::{settings::Style, Table, Tabled};
 use tokio::task::spawn_blocking;
 
+use squill::{config::Config, index::MigrationIndex, status::Status};
 use squill::{create_init_migration, create_new_migration};
-use squill::{Config, MigrationIndex, Status};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
