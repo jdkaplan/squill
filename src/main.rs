@@ -102,13 +102,13 @@ impl Provider for CliConfig {
 fn extract(fig: Figment) -> anyhow::Result<Config> {
     let migrations_dir: RelativePathBuf = fig.extract_inner("migrations_dir")?;
 
-    // If the templates dir is unset, that's fine because there are default embedded
+    // The templates dir is optional. If it is not set, this will use the default embedded
     // templates. This can still fail if the directory that _was_ set is invalid.
     let templates_dir: Option<RelativePathBuf> = extract_inner_or_default(&fig, "templates_dir")?;
 
     // Although it might not seem like it, this is easier than deriving Deserialize for a newtype
     // around PgConnectOptions.
-    let database_url: Option<String> = fig.extract_inner("database_url")?;
+    let database_url: Option<String> = extract_inner_or_default(&fig, "database_url")?;
 
     let database_connect_options = if let Some(url) = database_url {
         Some(url.parse::<PgConnectOptions>()?)
