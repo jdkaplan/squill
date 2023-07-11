@@ -71,7 +71,7 @@ pub struct CliConfig {
     #[clap(long, value_parser, global = true)]
     templates_dir: Option<String>,
 
-    #[clap(short, long, action = clap::ArgAction::Count, default_value_t = 1)]
+    #[clap(short, long, action = clap::ArgAction::Count, default_value_t = 1, global=true)]
     verbosity: u8,
 }
 
