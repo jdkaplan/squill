@@ -212,6 +212,8 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
     println!("  {}", files.up_path.to_string_lossy());
     println!("  {}", files.down_path.to_string_lossy());
     println!();
+    println!("Edit `up.sql` to perform the change you want and `down.sql` to reverse it.");
+    println!();
     println!("Run `squill migrate` to apply the up migration.");
 
     Ok(())
