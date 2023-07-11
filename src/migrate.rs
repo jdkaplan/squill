@@ -112,7 +112,10 @@ pub async fn unclaim(
 
 impl MigrationDirectory {
     pub async fn up(&self, conn: &mut PgConnection) -> Result<(), MigrateError> {
-        let sql = std::fs::read_to_string(&self.up_path).map_err(MigrateError::Read)?;
+        let sql = std::fs::read_to_string(&self.up_path).map_err(|err| MigrateError::Read {
+            path: self.up_path.to_path_buf(),
+            err,
+        })?;
 
         if skip_transaction(&sql) {
             conn.execute(&*sql).await.map_err(MigrateError::Execute)?;
@@ -135,7 +138,10 @@ impl MigrationDirectory {
 
     // TODO: Add some sort of "forward-only" flag that prevents down migrations.
     pub async fn down(&self, conn: &mut PgConnection) -> Result<(), MigrateError> {
-        let sql = std::fs::read_to_string(&self.down_path).map_err(MigrateError::Read)?;
+        let sql = std::fs::read_to_string(&self.down_path).map_err(|err| MigrateError::Read {
+            path: self.down_path.to_path_buf(),
+            err,
+        })?;
 
         if skip_transaction(&sql) {
             conn.execute(&*sql).await.map_err(MigrateError::Execute)?;
@@ -158,8 +164,8 @@ impl MigrationDirectory {
 
 #[derive(thiserror::Error, Debug)]
 pub enum MigrateError {
-    #[error("failed to read migration file: {0}")]
-    Read(std::io::Error),
+    #[error("failed to read migration file: {path}: {err}")]
+    Read { path: PathBuf, err: std::io::Error },
 
     #[error("failed to execute migration: {0}")]
     Execute(sqlx::Error),

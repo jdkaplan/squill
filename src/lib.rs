@@ -54,6 +54,7 @@ pub enum MigrateAllError {
 
 pub fn create_init_migration(config: &Config) -> Result<MigrationDirectory, NewMigrationError> {
     let templates = Templates::default();
+
     let mut index =
         MigrationIndex::new(&config.migrations_dir).map_err(NewMigrationError::Index)?;
 
