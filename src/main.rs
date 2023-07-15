@@ -62,15 +62,19 @@ pub struct Cli {
 
 #[derive(Debug, Deserialize, Serialize, Args)]
 pub struct CliConfig {
+    /// PostgreSQL connection string
     #[clap(long, value_parser, global = true)]
     database_url: Option<String>,
 
+    /// Path to migration root directory (default: migrations)
     #[clap(long, value_parser, global = true)]
     migrations_dir: Option<String>,
 
+    /// Path to template file directory (default: use embedded templates)
     #[clap(long, value_parser, global = true)]
     templates_dir: Option<String>,
 
+    /// Increase logging output (max: 3)
     #[clap(short, long, action = clap::ArgAction::Count, default_value_t = 1, global=true)]
     verbosity: u8,
 }
@@ -142,16 +146,46 @@ where
 
 #[derive(Subcommand, Debug)]
 pub enum Cmd {
+    /// Write the initial migration to the migration directory
+    ///
+    /// Run this to set up a project for Squill migrations.
+    ///
+    /// This will write out the first migration, which will set up the requirements for tracking
+    /// applied migrations in the database itself.
     Init,
+
+    /// Write a new empty migration for editing
+    ///
+    /// This will create a new directory and its up.sql and down.sql files. Edit those and then run
+    /// the migrate subcommand.
+    ///
+    /// The migration files will be created using the configured templates, if they exist.
     New(New),
 
+    /// Apply all migrations
+    ///
+    /// Run the up file for each unapplied migration in ID order.
+    Migrate,
+
+    /// Run the down file for the most recently applied migration
+    ///
+    /// Use this in development to reverse a migration.
+    Undo,
+
+    /// Run down-then-up for the most recently applied migration
+    ///
+    /// Use this in development to reapply a migration while iterating on it.
+    Redo,
+
+    /// Print the status of each migration in the database
+    Status,
+
+    /// Rename migration directories so IDs are the same width
+    ///
+    /// This will add prefix zeroes to the directory names so they sort correctly.
     // TODO(v0.6): Remove alias
     #[command(alias("renumber"))]
     AlignIds(AlignIds),
-    Status,
-    Migrate,
-    Undo,
-    Redo,
 }
 
 impl Cmd {
@@ -189,9 +223,11 @@ fn init(config: &Config) -> anyhow::Result<()> {
 
 #[derive(Args, Debug)]
 pub struct New {
+    /// Migration ID (default: current Unix timestamp)
     #[clap(long, value_parser)]
     pub id: Option<i64>,
 
+    /// Short migration name
     #[clap(long, value_parser)]
     pub name: String,
 }
@@ -224,6 +260,7 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
 
 #[derive(Args, Debug)]
 pub struct AlignIds {
+    /// Perform the directory renames
     // TODO(v0.6): Remove alias
     #[clap(long, value_parser, default_value = "false", alias("write"))]
     pub execute: bool,
