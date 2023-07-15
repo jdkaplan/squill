@@ -346,10 +346,20 @@ async fn migrate(config: &Config) -> anyhow::Result<()> {
 
     let mut conn = config.connect().await?;
 
-    for migration in status.pending() {
+    let pending = status.pending();
+
+    match pending.len() {
+        0 => println!("Database is up-to-date."),
+        1 => println!("There is 1 migration to run."),
+        n => println!("There are {n} migrations to run."),
+    }
+
+    for migration in pending {
         println!("Running up migration: {}", migration);
         migration.up(&mut conn).await?;
     }
+
+    println!("Done!");
 
     Ok(())
 }
