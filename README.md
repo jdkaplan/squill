@@ -114,15 +114,15 @@ most recently run migration.
 ### Renumbering migrations
 
 You may have a mix of migrations with different ID lengths, which can make it
-awkward to sort the directories. Use the `renumber` subcommand to zero-pad
-shorter IDs:
+the directory listing appear out of order. Use the `align-ids` subcommand to
+zero-pad shorter IDs:
 
 ```bash
-squill renumber
+squill align-ids
 ```
 
-That command is just a preview by default. Add `--write` to actually execute
-the renaming.
+That command is just a preview by default. Add `--execute` to actually execute
+all of the proposed renames.
 
 ### Custom migration templates
 

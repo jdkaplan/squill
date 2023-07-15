@@ -144,7 +144,10 @@ where
 pub enum Cmd {
     Init,
     New(New),
-    Renumber(Renumber),
+
+    // TODO(v0.6): Remove alias
+    #[command(alias("renumber"))]
+    AlignIds(AlignIds),
     Status,
     Migrate,
     Undo,
@@ -156,7 +159,7 @@ impl Cmd {
         match self {
             Cmd::Init => spawn_blocking(move || init(&config)).await?,
             Cmd::New(args) => spawn_blocking(move || new(&config, args)).await?,
-            Cmd::Renumber(args) => spawn_blocking(move || renumber(&config, args)).await?,
+            Cmd::AlignIds(args) => spawn_blocking(move || align_ids(&config, args)).await?,
 
             Cmd::Status => status(&config).await,
             Cmd::Migrate => migrate(&config).await,
@@ -220,9 +223,10 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
 }
 
 #[derive(Args, Debug)]
-pub struct Renumber {
-    #[clap(long, value_parser, default_value = "false")]
-    pub write: bool,
+pub struct AlignIds {
+    // TODO(v0.6): Remove alias
+    #[clap(long, value_parser, default_value = "false", alias("write"))]
+    pub execute: bool,
 }
 
 #[derive(Debug, Clone, Tabled)]
@@ -233,7 +237,7 @@ struct Rename {
     to: PathBuf,
 }
 
-fn renumber(config: &Config, args: Renumber) -> anyhow::Result<()> {
+fn align_ids(config: &Config, args: AlignIds) -> anyhow::Result<()> {
     let migrations = MigrationIndex::new(&config.migrations_dir)?;
 
     let renames = migrations.align_ids();
@@ -259,15 +263,15 @@ fn renumber(config: &Config, args: Renumber) -> anyhow::Result<()> {
     print_table(&renames);
     println!();
 
-    if args.write {
+    if args.execute {
         print!("Renaming files...");
         for r in renames {
             std::fs::rename(r.from, r.to)?;
         }
         println!(" done!");
     } else {
-        println!("Skipping the actual renames because writes were not enabled.");
-        println!("Add --write to do the rename.");
+        println!("Not executing the renames because writes were not enabled.");
+        println!("Add --execute to perform the renames.");
     }
 
     Ok(())
