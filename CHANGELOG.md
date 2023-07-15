@@ -17,11 +17,22 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ### Fixes
 
-- `init`, `new`, `renumber`: Allow filesystem-only commands without DB config
+- `init`, `new`, `renumber`/`align-ids`: Allow filesystem-only commands without DB config
 - `status`: Avoid printing duplicate rows for applied migrations
 - `status`: Print local migration directory name if present
 - `status`: Remove redundant "comment" field
 - `init`, `new`: Error if migration ID already exists
+- Make `-v`/`--verbosity` a global flag
+
+### Changes
+
+- Rename the `renumber --write` subcommand to `align-ids --execute`. The old subcommand and flag
+  will be available as hidden aliases until the next set of breaking changes.
+
+### Docs
+
+- Update the init migration comment text to clarify what the `no-transaction` directive does.
+- Add help text for all CLI subcommands and flags
 
 ### Development
 
