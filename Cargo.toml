@@ -3,10 +3,16 @@ name = "squill"
 version = "0.5.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "Manage Postgresql database migrations"
+description = "Database migrations for PostgreSQL"
 homepage = "https://github.com/jdkaplan/squill"
 repository = "https://github.com/jdkaplan/squill"
 readme = "README.md"
+
+include = [
+    "src",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+]
 
 [dependencies]
 anyhow = "1.0.71"
