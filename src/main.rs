@@ -239,16 +239,22 @@ fn renumber(config: &Config, args: Renumber) -> anyhow::Result<()> {
     let renames = migrations.align_ids();
 
     if renames.is_empty() {
-        return Err(anyhow::anyhow!("No migrations to renumber"));
+        return Err(anyhow::anyhow!("No migrations to rename"));
     }
 
     let renames: Vec<Rename> = renames
         .into_iter()
+        .filter(|r| r.from != r.to)
         .map(|r| Rename {
             from: r.from,
             to: r.to,
         })
         .collect();
+
+    if renames.is_empty() {
+        println!("All migration IDs are already the same width");
+        return Ok(());
+    }
 
     print_table(&renames);
     println!();
