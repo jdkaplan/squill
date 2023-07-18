@@ -29,7 +29,7 @@ cargo install squill
 To use Squill as a library, add this to your `Cargo.toml`:
 
 ```bash
-squill = "0.5.0"
+squill = "0.5.1"
 ```
 
 ## Usage

@@ -9,6 +9,8 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## 0.5.1 - 2023-07-18
+
 ### Fixes
 
 - `migrate`: Print the count of pending migrations to avoid empty output
