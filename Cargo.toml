@@ -24,7 +24,7 @@ serde = { version = "1.0.189", features = ["derive"] }
 sqlx = { version = "0.7.2", features = ["runtime-tokio-native-tls", "postgres", "time", "uuid"] }
 tabled = "0.14.0"
 tera = { version = "1.19.1", default-features = false }
-thiserror = "1.0.49"
+thiserror = "1.0.50"
 time = { version = "0.3.30", features = ["formatting", "serde"] }
 tokio = { version = "1.33.0", features = ["full"] }
 tracing = "0.1.39"
