@@ -16,7 +16,7 @@ include = [
 
 [dependencies]
 anyhow = "1.0.75"
-clap = { version = "4.4.8", features = ["derive"] }
+clap = { version = "4.4.9", features = ["derive"] }
 figment = { version = "0.10.12", features = ["env", "toml"] }
 lazy_static = "1.4.0"
 regex = "1.10.2"
