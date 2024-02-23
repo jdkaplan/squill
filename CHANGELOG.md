@@ -9,6 +9,10 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+### Fixes
+
+- (all commands): Print invalid directory names to the verbose log.
+
 ## 0.5.1 - 2023-07-18
 
 ### Fixes

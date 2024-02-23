@@ -46,7 +46,7 @@ impl TryFrom<i64> for MigrationId {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub enum ParseMigrationIdError {
     #[error(transparent)]
     ParseInt(#[from] std::num::ParseIntError),
@@ -77,6 +77,55 @@ pub struct MigrationDirectory {
 impl std::fmt::Display for MigrationDirectory {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.dir.to_string_lossy())
+    }
+}
+
+#[derive(Clone, Debug, thiserror::Error)]
+pub enum MigrationDirectoryError {
+    #[error("path is not a directory: {0:?}")]
+    NotDirectory(PathBuf),
+
+    #[error("invalid directory name: {0:?}")]
+    InvalidDirectoryName(PathBuf),
+
+    #[error("invalid migration id: {0:?}")]
+    InvalidMigrationId(#[from] ParseMigrationIdError),
+}
+
+impl TryFrom<PathBuf> for MigrationDirectory {
+    type Error = MigrationDirectoryError;
+
+    fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
+        if !path.is_dir() {
+            return Err(MigrationDirectoryError::NotDirectory(path));
+        }
+
+        lazy_static! {
+            static ref RE_MIGRATION: Regex =
+                Regex::new(r"^(?P<id>\d+)-(?P<name>.*)$").expect("static pattern");
+        }
+
+        let Some(m) = path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .and_then(|n| RE_MIGRATION.captures(n))
+        else {
+            return Err(MigrationDirectoryError::InvalidDirectoryName(path));
+        };
+
+        let id = m.name("id").expect("static capture group");
+        let id = id.as_str().parse()?;
+
+        let name = m.name("name").expect("static capture group");
+        let name = name.as_str().to_string();
+
+        Ok(MigrationDirectory {
+            id,
+            name,
+            up_path: path.join("up.sql"),
+            down_path: path.join("down.sql"),
+            dir: path,
+        })
     }
 }
 
