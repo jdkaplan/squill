@@ -198,8 +198,6 @@ pub enum Cmd {
     /// Rename migration directories so IDs are the same width
     ///
     /// This will add prefix zeroes to the directory names so they sort correctly.
-    // TODO(v0.6): Remove alias
-    #[command(alias("renumber"))]
     AlignIds(AlignIds),
 }
 
@@ -276,8 +274,7 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
 #[derive(Args, Debug)]
 pub struct AlignIds {
     /// Perform the directory renames
-    // TODO(v0.6): Remove alias
-    #[clap(long, value_parser, default_value = "false", alias("write"))]
+    #[clap(long, value_parser, default_value = "false")]
     pub execute: bool,
 }
 
