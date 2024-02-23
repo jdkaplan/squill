@@ -27,8 +27,8 @@ impl Status {
     pub fn pending(&self) -> Vec<MigrationDirectory> {
         self.available
             .iter()
-            .cloned()
             .filter(|m| !self.applied.log.contains_key(&m.id))
+            .cloned()
             .collect()
     }
 }

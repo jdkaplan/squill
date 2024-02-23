@@ -19,7 +19,7 @@ impl MigrationIndex {
 
         let mut multi_index: BTreeMap<MigrationId, Vec<MigrationDirectory>> = BTreeMap::new();
         for m in available {
-            multi_index.entry(m.id).or_insert(Vec::new()).push(m);
+            multi_index.entry(m.id).or_default().push(m);
         }
 
         let mut index = BTreeMap::new();
