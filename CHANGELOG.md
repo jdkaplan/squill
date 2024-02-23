@@ -11,9 +11,11 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## [0.7.0](https://github.com/jdkaplan/squill/compare/v0.6.0...v0.7.0) - 2024-02-23
 
-### Other
+### Changes
 - [**breaking**] Remove deprecated aliases for align-ids ([#143](https://github.com/jdkaplan/squill/pull/143))
-- Configure cargo-dist to use existing draft release
+
+### Development
+- Configure cargo-dist to publish binary releases
 
 ## [0.6.0](https://github.com/jdkaplan/squill/compare/v0.5.2...v0.6.0) - 2024-02-23
 
