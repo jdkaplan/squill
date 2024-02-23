@@ -375,7 +375,11 @@ async fn undo(config: &Config) -> anyhow::Result<()> {
     };
 
     let Some(migration) = status.available.get(migration.id) else {
-        return Err(anyhow!("Could not find files for migration ID {} ({})", migration.id, migration.name))
+        return Err(anyhow!(
+            "Could not find files for migration ID {} ({})",
+            migration.id,
+            migration.name
+        ));
     };
 
     let mut conn = config.connect().await?;
@@ -395,7 +399,11 @@ pub async fn redo(config: &Config) -> anyhow::Result<()> {
     };
 
     let Some(migration) = status.available.get(migration.id) else {
-        return Err(anyhow!("Could not find files for migration ID {} ({})", migration.id, migration.name))
+        return Err(anyhow!(
+            "Could not find files for migration ID {} ({})",
+            migration.id,
+            migration.name
+        ));
     };
 
     let mut conn = config.connect().await?;
