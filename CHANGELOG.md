@@ -9,6 +9,11 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.6.1](https://github.com/jdkaplan/squill/compare/v0.6.0...v0.6.1) - 2024-02-23
+
+### Other
+- Configure cargo-dist to use existing draft release
+
 ## [0.6.0](https://github.com/jdkaplan/squill/compare/v0.5.2...v0.6.0) - 2024-02-23
 
 ### Fixed
