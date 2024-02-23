@@ -14,12 +14,6 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 ### Fixed
 - [**breaking**] Handle long verbosity flag correctly ([#140](https://github.com/jdkaplan/squill/pull/140))
 
-### Other
-- cargo dist init
-- Configure release-plz to open drafts
-- Remove unused cargo-release config
-- Recommend cargo add to install library
-
 ## [0.5.2](https://github.com/jdkaplan/squill/compare/v0.5.1...v0.5.2) - 2024-02-23
 
 ### Fixed
