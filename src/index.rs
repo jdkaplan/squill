@@ -1,5 +1,3 @@
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::collections::BTreeMap;
 use std::fs;
 use std::io::Write;
@@ -154,31 +152,19 @@ fn available_migrations(dir: &Path) -> Result<Vec<MigrationDirectory>, IndexErro
         }
     };
 
-    lazy_static! {
-        static ref RE_MIGRATION: Regex =
-            Regex::new(r"^(?P<id>\d+)-(?P<name>.*)$").expect("static pattern");
-    }
-
     let paths: Vec<MigrationDirectory> = entries
         .filter_map(|entry| {
-            let path = entry.ok()?.path();
-            if path.is_dir() {
-                // TODO: log skip on errors
-                let m = RE_MIGRATION.captures(path.file_name()?.to_str()?)?;
+            let Ok(path) = entry.as_ref().map(|e| e.path()) else {
+                tracing::debug!("skipping directory entry error: {:?}", entry);
+                return None;
+            };
 
-                let id = m.name("id")?.as_str().parse().ok()?;
-                let name = m.name("name")?.as_str().to_string();
-
-                Some(MigrationDirectory {
-                    id,
-                    name,
-                    dir: path.clone(),
-                    up_path: path.join("up.sql"),
-                    down_path: path.join("down.sql"),
-                })
-            } else {
-                // TODO: log skip because not dir
-                None
+            match path.clone().try_into() {
+                Ok(dir) => Some(dir),
+                Err(err) => {
+                    tracing::warn!("skipping non-migration directory: {:?}: {:?}", path, err);
+                    None
+                }
             }
         })
         .collect();
