@@ -26,10 +26,10 @@ To install Squill as a command, use `cargo install`:
 cargo install squill
 ```
 
-To use Squill as a library, add this to your `Cargo.toml`:
+To use Squill as a library, use `cargo add`:
 
 ```bash
-squill = "0.5.1"
+cargo add squill
 ```
 
 ## Usage
