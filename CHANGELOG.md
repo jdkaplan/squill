@@ -9,7 +9,9 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
-### Fixes
+## [0.5.2](https://github.com/jdkaplan/squill/compare/v0.5.1...v0.5.2) - 2024-02-23
+
+### Fixed
 
 - (all commands): Print invalid directory names to the verbose log.
 
