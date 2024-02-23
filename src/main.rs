@@ -18,7 +18,7 @@ use squill::{create_init_migration, create_new_migration};
 async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    enable_tracing(cli.config.verbosity);
+    enable_tracing(cli.config.verbosity());
 
     let fig = Figment::new()
         .merge(Serialized::<RelativePathBuf>::default(
@@ -40,8 +40,9 @@ fn enable_tracing(verbosity: u8) {
     let max_level = match verbosity {
         0 => LevelFilter::OFF,
         1 => LevelFilter::ERROR,
-        2 => LevelFilter::INFO,
-        3.. => LevelFilter::DEBUG,
+        2 => LevelFilter::WARN,
+        3 => LevelFilter::INFO,
+        4.. => LevelFilter::DEBUG,
     };
 
     tracing_subscriber::fmt()
@@ -74,9 +75,23 @@ pub struct CliConfig {
     #[clap(long, value_parser, global = true)]
     templates_dir: Option<String>,
 
-    /// Increase logging output (max: 3)
-    #[clap(short, long, action = clap::ArgAction::Count, default_value_t = 1, global=true)]
-    verbosity: u8,
+    /// Increase logging output (up to 3 times)
+    #[clap(short, action = clap::ArgAction::Count, global=true, conflicts_with="verbosity")]
+    v: Option<u8>,
+
+    /// Set logging output level (silent: 0, max: 4, default: 1)
+    #[clap(long, global = true, conflicts_with = "v")]
+    verbosity: Option<u8>,
+}
+
+impl CliConfig {
+    pub fn verbosity(&self) -> u8 {
+        if let Some(v) = self.verbosity {
+            return v;
+        }
+
+        1 + self.v.unwrap_or_default()
+    }
 }
 
 impl Provider for CliConfig {
