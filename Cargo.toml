@@ -44,6 +44,8 @@ lto = "thin"
 cargo-dist-version = "0.10.0"
 # CI backends to support
 ci = ["github"]
+# Whether cargo-dist should create a Github Release or use an existing draft
+create-release = false
 # The installers to generate for each app
 installers = []
 # Target platforms to build apps for (Rust target-triple syntax)
