@@ -21,7 +21,7 @@ figment = { version = "0.10.13", features = ["env", "toml"] }
 lazy_static = "1.4.0"
 regex = "1.10.3"
 serde = { version = "1.0.196", features = ["derive"] }
-sqlx = { version = "0.7.3", features = ["runtime-tokio-native-tls", "postgres", "time", "uuid"] }
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "postgres", "time", "uuid"] }
 tabled = "0.15.0"
 tera = { version = "1.19.1", default-features = false }
 thiserror = "1.0.57"
