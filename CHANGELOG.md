@@ -9,6 +9,15 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.8.0](https://github.com/jdkaplan/squill/compare/v0.7.0...v0.8.0) - 2024-02-27
+
+### Fixed
+- Print no-migrations message on empty status ([#147](https://github.com/jdkaplan/squill/pull/147))
+- Fix typo in init.up.sql comment ([#146](https://github.com/jdkaplan/squill/pull/146))
+
+### Changed
+- Switch from native-tls to rustls ([#149](https://github.com/jdkaplan/squill/pull/149))
+
 ## [0.7.0](https://github.com/jdkaplan/squill/compare/v0.6.0...v0.7.0) - 2024-02-23
 
 ### Changes
