@@ -18,9 +18,9 @@ migration that defines it!
 
 So this file includes a squill:no-transaction directive (below), which tells
 Squill to skip those steps. You can use this in your own migrations if you want
-to control over the transaction and claim behavior. But remember: if you
-disable the automatic transaction, your migration is responsible for recording
-itself in the migration log!
+to control the transaction and claim behavior. But remember: if you disable the
+automatic transaction, your migration is responsible for recording itself in
+the migration log!
 
 You can modify the _squill_claim_migration function if you want to. The only
 expectation Squill has of it (besides the signature) is that it writes the
