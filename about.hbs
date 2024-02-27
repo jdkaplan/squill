@@ -1,0 +1,13 @@
+This file contains the full license text of all software included in Squill.
+
+{{#each licenses}}
+# {{{name}}} ({{{id}}})
+
+Used by:
+{{#each used_by}}
+  - {{{crate.name}}} {{{crate.version}}} {{#with crate.repository as | repo |}}{{{repo}}}{{else}}!!SOURCE:{{{crate.name}}}!!{{/with}}
+{{/each}}
+
+{{{text}}}
+
+{{/each}}

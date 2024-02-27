@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+has() {
+    command -V "$1" > /dev/null 2>&1
+}
+
+BINSTALL_INSTALLER_URL='https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh'
+BINSTALL_INSTALLER_SHA256='b2668d7619a953ad4bc43c340e91bb20eee2f8bda4c36fc5a3fd20f79846c03f'
+
+install_binstall() {
+    if has cargo-binstall; then
+        return 0
+    fi
+
+    binstall_installer_dir=$(mktemp -d)
+    curl --location "${BINSTALL_INSTALLER_URL}" \
+        --output "${binstall_installer_dir}/install-from-binstall-release.sh"
+
+    (cd "${binstall_installer_dir}" \
+        && echo "${BINSTALL_INSTALLER_SHA256}  install-from-binstall-release.sh" | sha256sum --check)
+
+    bash "${binstall_installer_dir}/install-from-binstall-release.sh"
+
+    rm -f "${binstall_installer_dir}/install-from-binstall-release.sh"
+    rmdir "${binstall_installer_dir}"
+}
+
+binstall() {
+    cmd="$1"
+    pkg="$2"
+
+    if has "$cmd"; then
+        return 0
+    fi
+
+    # Make sure we have binstall itself first!
+    install_binstall
+
+    cargo binstall --no-confirm "$pkg"
+}
+
+binstall cargo-about 'cargo-about@0.6.1'
+
+cargo about generate --fail about.hbs --output-file THIRD_PARTY_LICENSES
+
+function set_source() {
+    pkg="$1"
+    url="$2"
+
+    # Using sd would be easier, but I ran into glibc version issues last time I tried it.
+    sed --in-place "s%!!SOURCE:${pkg}!!%${url}%g" THIRD_PARTY_LICENSES
+}
+
+set_source openssl-macros          'https://github.com/sfackler/rust-openssl'
+set_source pear_codegen            'https://github.com/SergioBenitez/pear'
+set_source pear                    'https://github.com/SergioBenitez/pear'
+set_source proc-macro2-diagnostics 'https://github.com/SergioBenitez/proc-macro2-diagnostics'
+
+if grep '!!' THIRD_PARTY_LICENSES; then
+    echo >&2 'Placeholder still present in file'
+    exit 1
+fi
