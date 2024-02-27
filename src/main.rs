@@ -341,12 +341,21 @@ async fn status(config: &Config) -> anyhow::Result<()> {
 
     let zipped = status.full_status();
 
-    let rows = zipped.values().cloned().map(|v| MigrationStatus {
-        id: v.id.into(),
-        name: v.name,
-        run_at: v.run_at,
-        directory: v.directory,
-    });
+    let rows: Vec<_> = zipped
+        .values()
+        .cloned()
+        .map(|v| MigrationStatus {
+            id: v.id.into(),
+            name: v.name,
+            run_at: v.run_at,
+            directory: v.directory,
+        })
+        .collect();
+
+    if rows.is_empty() {
+        println!("No migrations to show");
+        return Ok(());
+    }
 
     print_table(rows);
     Ok(())
