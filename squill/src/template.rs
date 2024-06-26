@@ -155,7 +155,7 @@ mod tests {
         let config = env.config();
         let templates_dir = config.templates_dir.unwrap();
 
-        let templates = Templates::new(&templates_dir).unwrap();
+        let templates = Templates::new(templates_dir).unwrap();
 
         let ctx = TemplateContext {
             id: MigrationId(123),

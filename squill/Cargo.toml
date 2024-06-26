@@ -1,0 +1,31 @@
+[package]
+name = "squill"
+version = "0.8.0"
+description = "Manage PostgreSQL database migrations"
+
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+
+include = [
+    "src",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+]
+
+[dependencies]
+lazy_static = "1.4.0"
+regex = "1.10.3"
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "postgres", "time", "uuid"] }
+tera = { version = "1.19.1", default-features = false }
+thiserror = "1.0.57"
+time = { version = "0.3.32", features = ["formatting", "serde"] }
+tokio = { version = "1.35.1", features = ["full"] }
+tracing = "0.1.40"
+
+[dev-dependencies]
+anyhow = "1.0.78"
+tempfile = "3.5.0"
+uuid = { version = "1.6.1", features = ["v4", "serde"] }

@@ -1834,19 +1834,32 @@ name = "squill"
 version = "0.8.0"
 dependencies = [
  "anyhow",
- "clap",
- "figment",
  "lazy_static",
  "regex",
- "serde",
  "sqlx",
- "tabled",
  "tempfile",
  "tera",
  "thiserror",
  "time",
  "tokio",
  "tracing",
+ "uuid",
+]
+
+[[package]]
+name = "squill-cli"
+version = "0.8.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "figment",
+ "serde",
+ "sqlx",
+ "squill",
+ "tabled",
+ "tempfile",
+ "time",
+ "tokio",
  "tracing-subscriber",
  "uuid",
 ]
