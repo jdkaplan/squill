@@ -1,0 +1,36 @@
+[package]
+name = "squill-cli"
+version = "0.8.0"
+description = "Command-line tool for PostgreSQL database migrations"
+
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+
+include = [
+    "src",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+]
+
+[[bin]]
+name = "squill"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.78"
+clap = { version = "4.4.12", features = ["derive"] }
+figment = { version = "0.10.13", features = ["env", "toml"] }
+serde = { version = "1.0.196", features = ["derive"] }
+squill = { version = "=0.8.0", path = "../squill" }
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "postgres", "time", "uuid"] }
+tabled = "0.15.0"
+time = { version = "0.3.32", features = ["formatting", "serde"] }
+tokio = { version = "1.35.1", features = ["full"] }
+tracing-subscriber = "0.3.18"
+
+[dev-dependencies]
+tempfile = "3.5.0"
+uuid = { version = "1.6.1", features = ["v4", "serde"] }
