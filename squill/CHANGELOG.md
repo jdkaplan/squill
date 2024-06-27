@@ -9,6 +9,11 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.1](https://github.com/jdkaplan/squill/compare/squill-v0.9.0...squill-v0.9.1) - 2024-06-27
+
+### Other
+- Update binary install instructions
+
 ## [0.9.0](https://github.com/jdkaplan/squill/compare/v0.8.0...squill-v0.9.0) - 2024-06-27
 
 ### Added
