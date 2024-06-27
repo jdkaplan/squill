@@ -23,8 +23,12 @@ name 😉
 To install Squill as a command, use `cargo install`:
 
 ```bash
-cargo install squill
+cargo install squill-cli
 ```
+
+or download a pre-built package from the [GitHub Releases].
+
+[GitHub Releases]: https://github.com/jdkaplan/squill/releases?q=squill-cli
 
 To use Squill as a library, use `cargo add`:
 
