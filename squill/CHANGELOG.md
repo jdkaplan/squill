@@ -9,14 +9,12 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
-## [0.9.0](https://github.com/jdkaplan/squill/compare/squill-v0.8.0...squill-v0.9.0) - 2024-06-27
+## [0.9.0](https://github.com/jdkaplan/squill/compare/v0.8.0...squill-v0.9.0) - 2024-06-27
 
 ### Added
 - [**breaking**] Add named migration templates
 
 ### Other
-- Build static templates in bulk
-- Fork changelog for separate packages
 - [**breaking**] Split into bin and lib packages
 
 ## [0.8.0](https://github.com/jdkaplan/squill/compare/v0.7.0...v0.8.0) - 2024-02-27

@@ -9,26 +9,13 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
-## [0.8.0](https://github.com/jdkaplan/squill/releases/tag/squill-cli-v0.8.0) - 2024-06-27
+## [0.9.0](https://github.com/jdkaplan/squill/compare/v0.8.0...squill-cli-v0.9.0) - 2024-06-27
 
 ### Added
-- [**breaking**] Add named migration templates
-
-### Fixed
-- fix!(bin): `renumber --write` -> `align-ids --execute`
+- Add named migration templates
 
 ### Other
-- Fork changelog for separate packages
 - [**breaking**] Split into bin and lib packages
-- Recommend cargo add to install library
-- squill v0.5.1 ([#63](https://github.com/jdkaplan/squill/pull/63))
-- Prepare v0.5.0 release
-- Release v0.4.2
-- Add instructions for using the new library crate
-- Update install instructions
-- drift -> squill
-- "Release" v0.2.0
-- Rewrite it in Rust
 
 ## [0.8.0](https://github.com/jdkaplan/squill/compare/v0.7.0...v0.8.0) - 2024-02-27
 
