@@ -240,6 +240,10 @@ pub struct New {
     #[clap(long, value_parser)]
     pub id: Option<i64>,
 
+    /// Template name (default: the unnamed template in templates_dir)
+    #[clap(long, value_parser)]
+    pub template: Option<String>,
+
     /// Short migration name
     #[clap(long, value_parser)]
     pub name: String,
@@ -257,7 +261,7 @@ fn new(config: &Config, args: New) -> anyhow::Result<()> {
             .expect("system clock is not in the far future")
     });
 
-    let files = create_new_migration(config, id.try_into()?, args.name)?;
+    let files = create_new_migration(config, args.template, id.try_into()?, args.name)?;
 
     println!("New migration files:");
     println!();

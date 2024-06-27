@@ -14,7 +14,7 @@ use crate::config::{Config, ConnectError};
 use crate::index::{CreateMigrationError, IndexError, IoError, MigrationIndex, MigrationParams};
 use crate::migrate::{MigrateError, MigrationDirectory, MigrationId};
 use crate::status::{Status, StatusError};
-use crate::template::{TemplateContext, TemplateError, TemplateId, Templates};
+use crate::template::{TemplateContext, TemplateError, TemplateGroup, TemplateId, Templates};
 
 #[cfg(test)]
 mod testing;
@@ -64,11 +64,11 @@ pub fn create_init_migration(config: &Config) -> Result<MigrationDirectory, NewM
     };
 
     let up_sql = templates
-        .render(TemplateId::InitUp, &ctx)
+        .render(TemplateGroup::Default, TemplateId::InitUp, &ctx)
         .map_err(NewMigrationError::Template)?;
 
     let down_sql = templates
-        .render(TemplateId::InitDown, &ctx)
+        .render(TemplateGroup::Default, TemplateId::InitDown, &ctx)
         .map_err(NewMigrationError::Template)?;
 
     let params = MigrationParams {
@@ -83,6 +83,7 @@ pub fn create_init_migration(config: &Config) -> Result<MigrationDirectory, NewM
 
 pub fn create_new_migration(
     config: &Config,
+    template: Option<impl Into<String>>,
     id: MigrationId,
     name: impl AsRef<str>,
 ) -> Result<MigrationDirectory, NewMigrationError> {
@@ -92,6 +93,11 @@ pub fn create_new_migration(
         Templates::new(dir).map_err(NewMigrationError::Template)?
     } else {
         Templates::default()
+    };
+
+    let group = match template {
+        Some(s) => TemplateGroup::Named(s.into()),
+        None => TemplateGroup::Default,
     };
 
     let mut index =
@@ -105,11 +111,11 @@ pub fn create_new_migration(
     };
 
     let up_sql = templates
-        .render(TemplateId::NewUp, &ctx)
+        .render(&group, TemplateId::NewUp, &ctx)
         .map_err(NewMigrationError::Template)?;
 
     let down_sql = templates
-        .render(TemplateId::NewDown, &ctx)
+        .render(&group, TemplateId::NewDown, &ctx)
         .map_err(NewMigrationError::Template)?;
 
     let params = MigrationParams {
@@ -161,6 +167,10 @@ mod tests {
     use crate::testing::*;
 
     use super::*;
+
+    // A literal `None` needs a type annotation when used as `Option<impl AsRef<str>>`. This
+    // "typed None" avoids that awkward turbofishing in every test.
+    const NO_STR: Option<&str> = None;
 
     #[test]
     fn migration_slugs() {
@@ -229,7 +239,7 @@ mod tests {
         let env = TestEnv::new().await.unwrap();
         let config = env.config();
 
-        create_new_migration(&config, MigrationId(123), "create_users").unwrap();
+        create_new_migration(&config, NO_STR, MigrationId(123), "create_users").unwrap();
 
         let up =
             std::fs::read_to_string(config.migrations_dir.join("123-create_users/up.sql")).unwrap();
@@ -244,28 +254,66 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn new_migration_named_template() {
+        let env = TestEnv::new().await.unwrap();
+        let config = env.config();
+
+        let templates_dir = config.templates_dir.as_ref().unwrap();
+        std::fs::create_dir_all(templates_dir.join("create_table")).unwrap();
+        std::fs::write(templates_dir.join("create_table/new.up.sql"), CUSTOM_UP).unwrap();
+        std::fs::write(templates_dir.join("create_table/new.down.sql"), CUSTOM_DOWN).unwrap();
+
+        create_new_migration(
+            &config,
+            Some("create_table"),
+            MigrationId(123),
+            "create_users",
+        )
+        .unwrap();
+
+        let up =
+            std::fs::read_to_string(config.migrations_dir.join("123-create_users/up.sql")).unwrap();
+        assert!(
+            up.contains("-- Up\n-- 123 --\n-- create_users --\n"),
+            "{up:?}"
+        );
+
+        let down = std::fs::read_to_string(config.migrations_dir.join("123-create_users/down.sql"))
+            .unwrap();
+        assert!(
+            down.contains("/*\nDown\n123\ncreate_users\n*/\n"),
+            "{down:?}"
+        );
+    }
+
+    #[tokio::test]
     async fn simulated_interactive_session() {
         // squill init
         let env = TestEnv::initialized().await.unwrap();
         let config = env.config();
 
-        // Use custom templates to write the migrations 😉
-        //
-        // It's okay if this test needs to change to support improvements to templating.
         {
+            // Use custom templates to write the migrations 😉
+            //
+            // It's okay if this test needs to change to support improvements to templating.
             let templates_dir = config.templates_dir.as_ref().unwrap();
             std::fs::write(templates_dir.join("new.up.sql"), CREATE_TABLE_UP).unwrap();
             std::fs::write(templates_dir.join("new.down.sql"), CREATE_TABLE_DOWN).unwrap();
+
+            std::fs::create_dir_all(templates_dir.join("no_op")).unwrap();
+            std::fs::write(templates_dir.join("no_op/new.up.sql"), CUSTOM_UP).unwrap();
+            std::fs::write(templates_dir.join("no_op/new.down.sql"), CUSTOM_DOWN).unwrap();
         }
 
-        // squill new (differnt from application order!)
-        create_new_migration(&config, MigrationId(1), "users").unwrap();
-        create_new_migration(&config, MigrationId(34567), "profiles").unwrap();
-        create_new_migration(&config, MigrationId(200), "passwords").unwrap();
+        // squill new (different from application order!)
+        create_new_migration(&config, NO_STR, MigrationId(1), "users").unwrap();
+        create_new_migration(&config, NO_STR, MigrationId(34567), "profiles").unwrap();
+        create_new_migration(&config, NO_STR, MigrationId(200), "passwords").unwrap();
+        create_new_migration(&config, Some("no_op"), MigrationId(8), "no op").unwrap();
 
         // squill status
         let status = Status::new(&config).await.unwrap();
-        assert_eq!(3, status.pending().len());
+        assert_eq!(4, status.pending().len());
 
         // squill migrate
         migrate_all(&config).await.unwrap();
