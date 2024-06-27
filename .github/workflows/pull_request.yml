@@ -63,3 +63,35 @@ jobs:
           PGPASSWORD: 'password'
           PGHOST: 'localhost'
           PGPORT: '5432'
+
+  msrv:
+    name: Minimum Supported Rust Version
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@1.70
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo test --package squill --no-fail-fast
+        env:
+          PGUSER: 'postgres'
+          PGPASSWORD: 'password'
+          PGHOST: 'localhost'
+          PGPORT: '5432'
