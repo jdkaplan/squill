@@ -15,14 +15,15 @@ use crate::MigrationId;
 lazy_static! {
     static ref TERA: Tera = {
         let mut tera = Tera::default();
-        tera.add_raw_template("init.up.sql", include_str!("templates/init.up.sql"))
-            .expect("static template");
-        tera.add_raw_template("init.down.sql", include_str!("templates/init.down.sql"))
-            .expect("static template");
-        tera.add_raw_template("new.up.sql", include_str!("templates/new.up.sql"))
-            .expect("static template");
-        tera.add_raw_template("new.down.sql", include_str!("templates/new.down.sql"))
-            .expect("static template");
+
+        tera.add_raw_templates(vec![
+            ("init.up.sql", include_str!("templates/init.up.sql")),
+            ("init.down.sql", include_str!("templates/init.down.sql")),
+            ("new.up.sql", include_str!("templates/new.up.sql")),
+            ("new.down.sql", include_str!("templates/new.down.sql")),
+        ])
+        .expect("static templates");
+
         tera
     };
 }
