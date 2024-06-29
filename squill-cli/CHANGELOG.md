@@ -12,12 +12,11 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 ## [0.9.1](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.0...squill-cli-v0.9.1) - 2024-06-29
 
 ### Other
+- *(deps)* Remove unused dependency features
 - *(deps)* bump clap from 4.4.12 to 4.5.8
 - *(deps)* bump figment from 0.10.13 to 0.10.19
-- *(deps)* Remove unused dependency features
 - *(deps)* bump serde from 1.0.196 to 1.0.203
 - *(deps)* bump time from 0.3.32 to 0.3.36
-- Update binary install instructions
 
 ## [0.9.0](https://github.com/jdkaplan/squill/compare/v0.8.0...squill-cli-v0.9.0) - 2024-06-27
 
