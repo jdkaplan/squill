@@ -1848,7 +1848,7 @@ dependencies = [
 
 [[package]]
 name = "squill"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "anyhow",
  "lazy_static",
@@ -1865,7 +1865,7 @@ dependencies = [
 
 [[package]]
 name = "squill-cli"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "anyhow",
  "clap",
