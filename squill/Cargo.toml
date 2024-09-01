@@ -18,7 +18,7 @@ include = [
 [dependencies]
 lazy_static = "1.4.0"
 regex = "1.10.5"
-sqlx = { version = "0.7.4", features = ["postgres", "time"] }
+sqlx = { version = "0.8.1", features = ["postgres", "time"] }
 tera = { version = "1.19.1", default-features = false }
 thiserror = "1.0.61"
 time = "0.3.36"
@@ -26,7 +26,7 @@ tracing = "0.1.40"
 
 [dev-dependencies]
 anyhow = "1.0.78"
-sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls"] }
+sqlx = { version = "0.8.1", features = ["runtime-tokio-rustls"] }
 tempfile = "3.5.0"
 tokio = { version = "1.38.0", features = ["full"] }
 uuid = { version = "1.6.1", features = ["v4"] }
