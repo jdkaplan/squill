@@ -9,6 +9,16 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.2](https://github.com/jdkaplan/squill/compare/squill-v0.9.1...squill-v0.9.2) - 2024-10-06
+
+### Other
+
+- *(deps)* bump tera from 1.19.1 to 1.20.0 ([#180](https://github.com/jdkaplan/squill/pull/180))
+- *(deps)* bump sqlx from 0.7.3 to 0.7.4
+- *(deps)* bump regex from 1.10.3 to 1.10.5
+- *(deps)* bump tokio from 1.35.1 to 1.38.0
+- *(deps)* bump thiserror from 1.0.57 to 1.0.61
+
 ## [0.9.1](https://github.com/jdkaplan/squill/compare/squill-v0.9.0...squill-v0.9.1) - 2024-06-29
 
 ### Other

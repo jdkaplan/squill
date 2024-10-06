@@ -1,6 +1,6 @@
 [package]
 name = "squill-cli"
-version = "0.9.1"
+version = "0.9.2"
 description = "Command-line tool for PostgreSQL database migrations"
 
 edition.workspace = true
@@ -25,7 +25,7 @@ clap = { version = "4.5.8", features = ["derive"] }
 figment = { version = "0.10.19", features = ["env", "toml"] }
 serde = { version = "1.0.203", features = ["derive"] }
 sqlx = { version = "0.7.4", features = ["runtime-tokio-rustls"] }
-squill = { version = "=0.9.1", path = "../squill" }
+squill = { version = "=0.9.2", path = "../squill" }
 tabled = "0.15.0"
 time = "0.3.36"
 tokio = { version = "1.38.0", features = ["full"] }
