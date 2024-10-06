@@ -9,6 +9,13 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.2](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.1...squill-cli-v0.9.2) - 2024-10-06
+
+### Other
+
+- Update dependencies
+- Configure shell and NPM installers
+
 ## [0.9.1](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.0...squill-cli-v0.9.1) - 2024-06-29
 
 ### Other
