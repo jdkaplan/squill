@@ -336,8 +336,18 @@ mod tests {
         let last = status.applied.last().unwrap();
         let last = status.available.get(last.id).unwrap();
 
+        // Pretend that only_up was set by default.
         let mut conn = config.connect().await.unwrap();
-        last.down(&mut conn).await.unwrap();
+        match last.down(&mut conn, true).await {
+            Err(MigrateError::OnlyUp) => (),
+
+            Err(err) => panic!("Unexpected error: {:?}", err),
+            Ok(_) => panic!("Unexpected success"),
+        }
+
+        // Now unset only_up to allow the reversal.
+        let mut conn = config.connect().await.unwrap();
+        last.down(&mut conn, false).await.unwrap();
 
         // Make sure the right tables exist
         let mut conn = config.connect().await.unwrap();

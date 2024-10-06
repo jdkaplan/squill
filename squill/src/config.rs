@@ -8,6 +8,9 @@ pub struct Config {
 
     pub migrations_dir: PathBuf,
     pub templates_dir: Option<PathBuf>,
+
+    /// Only allow up migrations to run.
+    pub only_up: bool,
 }
 
 impl Config {

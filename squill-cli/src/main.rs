@@ -135,10 +135,13 @@ fn extract(fig: Figment) -> anyhow::Result<Config> {
         None
     };
 
+    let only_up: bool = extract_inner_or_default(&fig, "only_up")?;
+
     Ok(Config {
         database_connect_options,
         migrations_dir: migrations_dir.relative(),
         templates_dir: templates_dir.map(|dir| dir.relative()),
+        only_up,
     })
 }
 
@@ -410,7 +413,7 @@ async fn undo(config: &Config) -> anyhow::Result<()> {
     let mut conn = config.connect().await?;
 
     println!("Running down migration: {}", migration);
-    migration.down(&mut conn).await?;
+    migration.down(&mut conn, config.only_up).await?;
 
     Ok(())
 }
@@ -434,7 +437,7 @@ pub async fn redo(config: &Config) -> anyhow::Result<()> {
     let mut conn = config.connect().await?;
 
     println!("Running down migration: {}", migration);
-    migration.down(&mut conn).await?;
+    migration.down(&mut conn, config.only_up).await?;
 
     println!("Running up migration: {}", migration);
     migration.up(&mut conn).await?;
