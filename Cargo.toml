@@ -33,7 +33,10 @@ windows-archive = ".tar.gz"
 unix-archive = ".tar.gz"
 # A namespace to use when publishing this package to the npm registry
 npm-scope = ""
+# The npm package should have this name
 npm-package = "squill-cli"
+# Publish jobs to run in CI
+publish-jobs = ["npm"]
 # Path that installers should place binaries in
 install-path = "CARGO_HOME"
 # Whether to install an updater program
