@@ -9,6 +9,14 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.2](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.1...squill-cli-v0.9.2) - 2024-10-06
+
+### Other
+
+- *(deps)* bump sqlx from 0.7.4 to 0.8.2 ([#196](https://github.com/jdkaplan/squill/pull/196))
+- *(deps)* bump sqlx from 0.7.3 to 0.7.4
+- *(deps)* bump tokio from 1.35.1 to 1.38.0
+
 ## [0.9.1](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.0...squill-cli-v0.9.1) - 2024-06-29
 
 ### Other
