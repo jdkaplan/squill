@@ -9,6 +9,12 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.3](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.2...squill-cli-v0.9.3) - 2024-10-07
+
+### Added
+
+- Add only_up config field to prevent reversing migrations ([#205](https://github.com/jdkaplan/squill/pull/205))
+
 ## [0.9.2](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.1...squill-cli-v0.9.2) - 2024-10-06
 
 ### Other
