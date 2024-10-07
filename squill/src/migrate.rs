@@ -185,8 +185,11 @@ impl MigrationDirectory {
         Ok(())
     }
 
-    // TODO: Add some sort of "forward-only" flag that prevents down migrations.
-    pub async fn down(&self, conn: &mut PgConnection) -> Result<(), MigrateError> {
+    pub async fn down(&self, conn: &mut PgConnection, only_up: bool) -> Result<(), MigrateError> {
+        if only_up {
+            return Err(MigrateError::OnlyUp);
+        }
+
         let sql = std::fs::read_to_string(&self.down_path).map_err(|err| MigrateError::Read {
             path: self.down_path.to_path_buf(),
             err,
@@ -218,6 +221,9 @@ pub enum MigrateError {
 
     #[error("failed to execute migration: {0}")]
     Execute(sqlx::Error),
+
+    #[error("cannot execute down migration: not allowed with only_up")]
+    OnlyUp,
 }
 
 #[cfg(test)]

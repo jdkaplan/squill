@@ -47,6 +47,7 @@ impl TestEnv {
             database_connect_options: Some(self.database.connect_options.clone()),
             migrations_dir: self.migrations_dir.path().into(),
             templates_dir: Some(self.templates_dir.path().into()),
+            only_up: true,
         }
     }
 }

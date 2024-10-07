@@ -65,6 +65,12 @@ migrations_dir = "migrations"
 #
 # Default: (unset) (use the embedded default migration templates)
 templates_dir = ".squill/templates"
+
+# Whether only up migrations should be allowed. This can be used to avoid
+# accidental data loss in shared environments.
+#
+# Default: false (allow down migrations)
+only_up = true
 ```
 
 Then, generate the first migration that sets up Squill's requirements:
