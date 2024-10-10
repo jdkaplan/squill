@@ -9,6 +9,12 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.4](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.3...squill-cli-v0.9.4) - 2024-10-10
+
+### Fixed
+
+- *(build)* Trivial change to re-release CLI
+
 ## [0.9.3](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.2...squill-cli-v0.9.3) - 2024-10-07
 
 ### Added

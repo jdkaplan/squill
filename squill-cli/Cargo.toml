@@ -1,6 +1,6 @@
 [package]
 name = "squill-cli"
-version = "0.9.3"
+version = "0.9.4"
 description = "Command-line tool for PostgreSQL database migrations"
 
 edition.workspace = true
