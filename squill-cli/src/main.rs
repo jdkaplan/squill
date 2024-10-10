@@ -418,7 +418,7 @@ async fn undo(config: &Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-// TODO: Optionally redo a specific ID
+// TODO: Optionally redo a specific ID?
 pub async fn redo(config: &Config) -> anyhow::Result<()> {
     let status = Status::new(config).await?;
 
