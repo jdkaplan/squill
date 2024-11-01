@@ -28,5 +28,5 @@ tracing = "0.1.40"
 anyhow = "1.0.78"
 sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls"] }
 tempfile = "3.5.0"
-tokio = { version = "1.40.0", features = ["full"] }
+tokio = { version = "1.41.0", features = ["full"] }
 uuid = { version = "1.10.0", features = ["v4"] }
