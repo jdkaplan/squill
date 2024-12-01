@@ -20,7 +20,7 @@ lazy_static = "1.4.0"
 regex = "1.10.5"
 sqlx = { version = "0.8.2", features = ["postgres", "time"] }
 tera = { version = "1.20.0", default-features = false }
-thiserror = "1.0.64"
+thiserror = "2.0.3"
 time = "0.3.36"
 tracing = "0.1.40"
 
