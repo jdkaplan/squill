@@ -21,7 +21,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.78"
-clap = { version = "4.5.8", features = ["derive"] }
+clap = { version = "4.5.23", features = ["derive"] }
 figment = { version = "0.10.19", features = ["env", "toml"] }
 serde = { version = "1.0.203", features = ["derive"] }
 sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls"] }
