@@ -25,7 +25,7 @@ time = "0.3.36"
 tracing = "0.1.40"
 
 [dev-dependencies]
-anyhow = "1.0.78"
+anyhow = "1.0.95"
 sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls"] }
 tempfile = "3.5.0"
 tokio = { version = "1.40.0", features = ["full"] }
