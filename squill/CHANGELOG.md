@@ -9,6 +9,12 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.10.1](https://github.com/jdkaplan/squill/compare/squill-v0.10.0...squill-v0.10.1) - 2025-02-28
+
+### Other
+
+- *(deps)* bump regex from 1.11.0 to 1.11.1 (#208)
+
 ## [0.10.0](https://github.com/jdkaplan/squill/compare/squill-v0.9.2...squill-v0.10.0) - 2024-10-07
 
 ### Added
