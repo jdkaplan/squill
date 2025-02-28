@@ -9,6 +9,12 @@ This project uses [Semantic Versioning], and is currently in a pre-release state
 
 ## Unreleased
 
+## [0.9.5](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.4...squill-cli-v0.9.5) - 2025-02-28
+
+### Other
+
+- update Cargo.lock dependencies
+
 ## [0.9.4](https://github.com/jdkaplan/squill/compare/squill-cli-v0.9.3...squill-cli-v0.9.4) - 2024-10-10
 
 ### Fixed
