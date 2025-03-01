@@ -20,7 +20,7 @@ name = "squill"
 path = "src/main.rs"
 
 [dependencies]
-anyhow = "1.0.78"
+anyhow = "1.0.96"
 clap = { version = "4.5.8", features = ["derive"] }
 figment = { version = "0.10.19", features = ["env", "toml"] }
 serde = { version = "1.0.203", features = ["derive"] }
