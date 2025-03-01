@@ -28,5 +28,5 @@ sqlx = { version = "0.8.2", features = ["runtime-tokio-rustls"] }
 squill = { version = "=0.10.0", path = "../squill" }
 tabled = { version = "0.16.0", git = "https://github.com/jdkaplan/tabled.git", rev="6462758e28619af0b578c37220b74e4e660e0d4f" }
 time = "0.3.36"
-tokio = { version = "1.40.0", features = ["full"] }
+tokio = { version = "1.43.0", features = ["full"] }
 tracing-subscriber = "0.3.18"
